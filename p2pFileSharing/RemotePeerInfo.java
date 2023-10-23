@@ -10,11 +10,13 @@
 public class RemotePeerInfo {
         public String peerId;
         public String peerAddress;
-        public String peerPort;
+        public int peerPort;
+        public int containsFile;
         
-        public RemotePeerInfo(String pId, String pAddress, String pPort) {
-                peerId = pId;
-                peerAddress = pAddress;
-                peerPort = pPort;
+        public RemotePeerInfo(String pId, String pAddress, String pPort, String cFile) {
+                this.peerId = pId;
+                this.peerAddress = pAddress;
+                this.peerPort = Integer.parseInt(pPort);
+                this.containsFile = Integer.parseInt(cFile);
         }
 }
