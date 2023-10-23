@@ -15,8 +15,6 @@ public class peerProcess {
         public String fileSize;                 // FileSize
         public String pieceSize;                // PieceSize
 
-        public Vector<peerProcess> commonInfoVector;
-
         // The peer info properties in PeerInfo.cfg are:
 
         public String peerID;                   // Peer ID
@@ -24,14 +22,11 @@ public class peerProcess {
         public String listenPort;               // Listening port
         public String hasFileOrNoFile;          // Has file or not
 
-        public Vector<peerProcess> peerInfoProperties;
-
-        public String theCurrentPeerID;         // Current Peer ID
 
         // Default constructor for peerProcess
-        public peerProcess(String pID){
+        public peerProcess(String pID) {
 
-                theCurrentPeerID = pID;
+                peerID = pID;
         }
 
         // Constructor for peerProcess to initialize properties of PeerInfo.cfg
@@ -44,40 +39,23 @@ public class peerProcess {
 
         }
 
-        // Constructor for peerProcess to initialize properties of Common.cfg
-        public peerProcess(String nPNeighbors, String uI, String oUInterval, String fName, String fSize, String pSize) {
-
-                numPreferNeighbors = nPNeighbors;
-                uInterval = uI;
-                optimistUInterval = oUInterval;
-                fileName = fName;
-                fileSize = fSize;
-                pieceSize = pSize;
-        }
-
-        // Reads the contents of Common.cfg and assigns the output to peerProcess constructor
+        // Reads the contents of Common.cfg and assigns the values to variables for this peer process
         public void getCommonInfo() {
-
-                commonInfoVector = new Vector<peerProcess>();
                 
                 Vector<String> token = new Vector<String>();
 
                 try{
 
                         File common = new File("Common.cfg");
-                        Scanner myScanner = new Scanner(common).useDelimiter("\\s+");
+                        try (Scanner myScanner = new Scanner(common).useDelimiter("\\s+")) {
+                                while(myScanner.hasNext()) {
 
 
-                        while(myScanner.hasNext()) {
+                                        token.add(myScanner.next());
 
-                                //System.out.println("Begin token sequence ----");
-                                //System.out.println(myScanner.next());
-
-                                token.add(myScanner.next());
-
-                                //System.out.println("End token sequence ----");
-
+                                }
                         }
+
 
                         for(int i = 0; i< token.size(); i++) {
 
@@ -87,7 +65,12 @@ public class peerProcess {
 
                         System.out.println();
 
-                        commonInfoVector.addElement(new peerProcess(token.get(1), token.get(3), token.get(5), token.get(7>
+                        numPreferNeighbors = token.get(1);
+                        uInterval= token.get(3);
+                        optimistUInterval = token.get(5);
+                        fileName = token.get(7);
+                        fileSize = token.get(9);
+                        pieceSize = token.get(11);
 
                 }
                 catch (Exception ex) {
@@ -96,50 +79,41 @@ public class peerProcess {
 
                 }
         }
+        
 
-        // Reads the contents of PeerInfo.cfg and assigns output to peerProcess constructor
+        // Reads the contents of PeerInfo.cfg and assigns the corret values to variables for this peer process
         public void getPeerInfo() {
-
-                peerInfoProperties = new Vector<peerProcess>();
-
                 try{
 
                         File common = new File("PeerInfo.cfg");
-                        Scanner myScanner = new Scanner(common);
+                        try (Scanner myScanner = new Scanner(common)) {
+                                // Iterating through PeerInfo.cfg and matching peer ID to current peer process
+                                // to determine the properties to assign to this peer process
+                                while(myScanner.hasNext()) {
 
-                        while(myScanner.hasNext()) {
+                                        String pID = myScanner.next();
+                                        myScanner.useDelimiter("\\s+");
 
-                                Vector<String> token = new Vector<String>();
 
-                                //System.out.println("Begin token sequence ----");
-                                //System.out.println(myScanner.next());
+                                        if (pID == this.peerID) {    
+                                                hostName = myScanner.next();  
+                                                myScanner.useDelimiter("\\s+");     
+                                                listenPort = myScanner.next();
+                                                myScanner.useDelimiter("\\s+");
+                                                hasFileOrNoFile = myScanner.next();
+                                                myScanner.useDelimiter("\\s+");
+                                                break;
+                                        }
+                                        else {
 
-                                token.add(myScanner.next());
-                                myScanner.useDelimiter("\\s+");
-
-                                //System.out.println(myScanner.next());
-
-                                token.add(myScanner.next());
-                                myScanner.useDelimiter("\\s+");
-
-                                //System.out.println(myScanner.next());
-
-                                token.add(myScanner.next());
-                                myScanner.useDelimiter("\\s+");
-
-                                //System.out.println(myScanner.next());
-
-                                token.add(myScanner.next());
-
-                                //System.out.println("End token sequence ----");
-
-                                for(int i = 0; i < token.size(); i++) {
-
-                                        System.out.println("Peer Info Token: " + token.get(i));
+                                                myScanner.next();
+                                                myScanner.useDelimiter("\\s+");
+                                                myScanner.next();
+                                                myScanner.useDelimiter("\\s+");
+                                                myScanner.next();
+                                                myScanner.useDelimiter("\\s+");
+                                        }
                                 }
-
-                                peerInfoProperties.addElement(new peerProcess(token.get(0), token.get(1), token.get(2), t>
-
                         }
                 }
                 catch (Exception ex) {
@@ -195,13 +169,6 @@ public class peerProcess {
         }
 
         // ---------- Getters for PeerInfo.cfg properties ----------
-
-        // Returns the current peer ID, e.g. java peerProcess 1001
-        public String getCurrentPeerID() {
-
-                return theCurrentPeerID;
-
-        }
 
         // Returns the peer ID, e.g. 1002
         public String getPeerID() {
