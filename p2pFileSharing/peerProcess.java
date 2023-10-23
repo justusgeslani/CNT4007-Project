@@ -15,6 +15,9 @@ public class peerProcess {
         public String fileSize;                 // FileSize
         public String pieceSize;                // PieceSize
 
+        public String numberOfPieces;           // Number of pieces in this file
+        public String sizeOfLastPiece;          // Size of last piece in this file
+
         // The peer info properties in PeerInfo.cfg are:
 
         public String peerID;                   // Peer ID
@@ -63,7 +66,6 @@ public class peerProcess {
 
                         }
 
-                        System.out.println();
 
                         numPreferNeighbors = token.get(1);
                         uInterval= token.get(3);
@@ -71,6 +73,21 @@ public class peerProcess {
                         fileName = token.get(7);
                         fileSize = token.get(9);
                         pieceSize = token.get(11);
+
+                        int sizeOfFile = Integer.parseInt(fileSize); // e.g. sizeOfFile = fileSize = 10,000,232 bytes
+                        int sizeOfPiece = Integer.parseInt(pieceSize); // e.g. sizeOfPiece = pieceSize = 32768 bytes each piece
+
+                        int numPieces = (sizeOfFile / sizeOfPiece); // (10,000,232 / 32768) = 305 pieces
+                        int lastPieceSize = sizeOfFile - (sizeOfPiece * numPieces); // 10,000,232 - (32768 * 305) = 5,992 bytes for last piece
+                        numPieces += 1; // 305 + 1 = 306 pieces total
+
+                        numberOfPieces = Integer.toString(numPieces);
+                        sizeOfLastPiece = Integer.toString(lastPieceSize);
+
+                        System.out.println("Number of Pieces: " + numberOfPieces);
+                        System.out.println("Size of last piece: " + sizeOfLastPiece);
+                        System.out.println();
+
 
                 }
                 catch (Exception ex) {
@@ -95,22 +112,44 @@ public class peerProcess {
                                         myScanner.useDelimiter("\\s+");
 
 
-                                        if (pID == this.peerID) {    
-                                                hostName = myScanner.next();  
-                                                myScanner.useDelimiter("\\s+");     
+                                        if(pID.equals(this.peerID)) {
+
+                                                System.out.println("Peer ID: " + pID);
+                                                System.out.println("----- This peer ID matches current peer process -----");
+                                                
+                                                hostName = myScanner.next();
+                                                System.out.println("Host name: " + hostName);
+                                                
+                                                myScanner.useDelimiter("\\s+");
+                                                
                                                 listenPort = myScanner.next();
+                                                System.out.println("Listening port: " + listenPort);
+                                                
                                                 myScanner.useDelimiter("\\s+");
+                                                
                                                 hasFileOrNoFile = myScanner.next();
+                                                System.out.println("Has file or not: " + hasFileOrNoFile);
+                                                
                                                 myScanner.useDelimiter("\\s+");
+                                                System.out.println();
+                                                
                                                 break;
                                         }
                                         else {
+                                                
+                                                System.out.println("Peer ID: " + pID);
+                                                System.out.println("----- This peer ID does not match current peer process -----");
+                                                
+                                                System.out.println("Host name: " + myScanner.next());
+                                                
+                                                myScanner.useDelimiter("\\s+");
 
-                                                myScanner.next();
+                                                System.out.println("Listening port: " + myScanner.next());
+                                                
                                                 myScanner.useDelimiter("\\s+");
-                                                myScanner.next();
-                                                myScanner.useDelimiter("\\s+");
-                                                myScanner.next();
+
+                                                System.out.println("Has file or not: " + myScanner.next());
+                                                
                                                 myScanner.useDelimiter("\\s+");
                                         }
                                 }
