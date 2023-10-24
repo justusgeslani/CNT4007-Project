@@ -27,7 +27,7 @@ public class peerProcess {
 
         // Properties derived from above properties
 
-        public ArrayList<Integer> bitfield;     // Bitfield
+        public ArrayList<Integer> bitfield = new ArrayList<Integer>();     // Bitfield
 
 
         // Default constructor for peerProcess
