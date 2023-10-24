@@ -48,32 +48,13 @@ public class peerProcessClient {
 			//create a socket to connect to the server
 			requestSocket = new Socket(hostName, cPort);
 			System.out.println("Connected to " + hostName + " in port " + cPort);
-			//initialize inputStream and outputStream
-			out = new ObjectOutputStream(requestSocket.getOutputStream());
-			out.flush();
-			in = new ObjectInputStream(requestSocket.getInputStream());
-			
-			//get Input from standard input
-			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
-			while(true)
-			{
-				System.out.print("Hello, please input a sentence: ");
-				//read a sentence from the standard input
-				message = bufferedReader.readLine();
-				//Send the sentence to the server
-				sendMessage(message);
-				//Receive the upperCase sentence from the server
-				MESSAGE = (String)in.readObject();
-				//show the message to the user
-				System.out.println("Receive message: " + MESSAGE);
-			}
+
+			int serverNum = 1;
+			new ClientHandler(requestSocket, serverNum).start();
 		}
 		catch (ConnectException e) {
     			System.err.println("Connection refused. You need to initiate a server first.");
-		} 
-		catch ( ClassNotFoundException e ) {
-            		System.err.println("Class not found");
-        	} 
+		}
 		catch(UnknownHostException unknownHost){
 			System.err.println("You are trying to connect to an unknown host!");
 		}
@@ -92,18 +73,83 @@ public class peerProcessClient {
 			}
 		}
 	}
-	//send a message to the output stream
-	void sendMessage(String msg)
-	{
-		try{
-			//stream write the message
-			out.writeObject(msg);
-			out.flush();
+
+	/**
+	 * A handler thread class for clients.
+	 */
+	private static class ClientHandler extends Thread {
+		private String message;    //message to send to server
+		private String MESSAGE;    //uppercase message received by server
+		private Socket connection;
+		private ObjectInputStream in;    //stream read from the socket
+		private ObjectOutputStream out;    //stream write to the socket
+		private int no;        //The index number of the server
+
+		public ClientHandler(Socket connection, int no) {
+			this.connection = connection;
+			this.no = no;
 		}
-		catch(IOException ioException){
-			ioException.printStackTrace();
+
+		public void run() {
+			try{
+				//initialize inputStream and outputStream
+				out = new ObjectOutputStream(this.connection.getOutputStream());
+				out.flush();
+				in = new ObjectInputStream(this.connection.getInputStream());
+
+				//get Input from standard input
+				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+				while(true)
+				{
+					System.out.print("Hello, please input a sentence: ");
+					//read a sentence from the standard input
+					message = bufferedReader.readLine();
+					//Send the sentence to the server
+					sendMessage(message);
+					//Receive the upperCase sentence from the server
+					MESSAGE = (String)in.readObject();
+					//show the message to the user
+					System.out.println("Receive message: " + MESSAGE);
+				}
+			}
+			catch (ConnectException e) {
+				System.err.println("Connection refused. You need to initiate a server first.");
+			}
+			catch ( ClassNotFoundException e ) {
+				System.err.println("Class not found");
+			}
+			catch(UnknownHostException unknownHost){
+				System.err.println("You are trying to connect to an unknown host!");
+			}
+			catch(IOException ioException){
+				ioException.printStackTrace();
+			}
+			finally{
+				//Close connections
+				try{
+					in.close();
+					out.close();
+					this.connection.close();
+				}
+				catch(IOException ioException){
+					ioException.printStackTrace();
+				}
+			}
 		}
+
+		//send a message to the output stream
+		void sendMessage(String msg)
+		{
+			try{
+				//stream write the message
+				out.writeObject(msg);
+				out.flush();
+			}
+			catch(IOException ioException){
+				ioException.printStackTrace();
+			}
+		}
+
+
 	}
-
-
 }

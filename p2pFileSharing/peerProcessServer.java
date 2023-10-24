@@ -24,11 +24,8 @@ public class peerProcessServer {
 		System.out.println("The server is running.");
         try (ServerSocket listener = new ServerSocket(sPort)) {
             int clientNum = 1;
-			// Add the server to the static array list to keep track of what servers are available!
-			// So new peer processes know which servers to contact to connect to!
-			peerProcess.availablePeerServers.add(sPort);
             while (true) {
-                new Handler(listener.accept(), clientNum).start();
+                new ServerHandler(listener.accept(), clientNum).start();
                 System.out.println("Client " + clientNum + " is connected!");
                 clientNum++;
             }
@@ -39,7 +36,7 @@ public class peerProcessServer {
      	* A handler thread class.  Handlers are spawned from the listening
      	* loop and are responsible for dealing with a single client's requests.
      	*/
-    	private static class Handler extends Thread {
+    	private static class ServerHandler extends Thread {
         	private String message;    //message received from the client
 			private String MESSAGE;    //uppercase message send to the client
 			private Socket connection;
@@ -47,7 +44,7 @@ public class peerProcessServer {
         	private ObjectOutputStream out;    //stream write to the socket
 			private int no;		//The index number of the client
 
-        	public Handler(Socket connection, int no) {
+        	public ServerHandler(Socket connection, int no) {
 				this.connection = connection;
 	    		this.no = no;
         	}
