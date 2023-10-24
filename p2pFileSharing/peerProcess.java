@@ -267,6 +267,9 @@ public class peerProcess {
                         start.getPeerInfo();
                         start.setBitfield();
 
+                        peerProcessClient client = new peerProcessClient(start.hostName, Integer.parseInt(start.listenPort));
+			client.run();
+
                 }
                 catch (Exception ex) {
 
