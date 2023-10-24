@@ -7,7 +7,7 @@ import java.util.*;
 public class peerProcessServer {
 
 	// The server will be listening on this port number
-	private int sPort = 8000;
+	private int sPort;
 
 	// Default constructor for the peer process server
 	public peerProcessServer() {

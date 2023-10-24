@@ -123,17 +123,17 @@ public class peerProcess {
                                                 System.out.println("Peer ID: " + pID);
                                                 System.out.println("----- This peer ID matches current peer process -----");
                                                 
-                                                hostName = myScanner.next();
+                                                this.hostName = myScanner.next();
                                                 System.out.println("Host name: " + hostName);
                                                 
                                                 myScanner.useDelimiter("\\s+");
                                                 
-                                                listenPort = myScanner.next();
+                                                this.listenPort = myScanner.next();
                                                 System.out.println("Listening port: " + listenPort);
                                                 
                                                 myScanner.useDelimiter("\\s+");
                                                 
-                                                hasFileOrNoFile = myScanner.next();
+                                                this.hasFileOrNoFile = myScanner.next();
                                                 System.out.println("Has file or not: " + hasFileOrNoFile);
                                                 
                                                 myScanner.useDelimiter("\\s+");
@@ -271,6 +271,10 @@ public class peerProcess {
 
                         peerProcessServer server = new peerProcessServer(Integer.parseInt(start.listenPort));
                         server.run();
+
+                        if (!availablePeerServers.isEmpty()) {
+                                // Create clients and connect to different servers
+                        }
 
 
 
