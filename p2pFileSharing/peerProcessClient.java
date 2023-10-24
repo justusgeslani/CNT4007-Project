@@ -46,14 +46,33 @@ public class peerProcessClient {
 	{
 		try{
 			//create a socket to connect to the server
-			requestSocket = new Socket(hostName, cPort);
-			System.out.println("Connected to " + hostName + " in port " + cPort);
+			requestSocket = new Socket(this.hostName, this.cPort);
+			System.out.println("Connected to " + this.hostName + " in port " + this.cPort);
+			//initialize inputStream and outputStream
+			out = new ObjectOutputStream(requestSocket.getOutputStream());
+			out.flush();
+			in = new ObjectInputStream(requestSocket.getInputStream());
 
-			int serverNum = 1;
-			new ClientHandler(requestSocket, serverNum).start();
+			//get Input from standard input
+			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+			while(true)
+			{
+				System.out.print("Hello, please input a sentence: ");
+				//read a sentence from the standard input
+				message = bufferedReader.readLine();
+				//Send the sentence to the server
+				sendMessage(message);
+				//Receive the upperCase sentence from the server
+				MESSAGE = (String)in.readObject();
+				//show the message to the user
+				System.out.println("Receive message: " + MESSAGE);
+			}
 		}
 		catch (ConnectException e) {
-    			System.err.println("Connection refused. You need to initiate a server first.");
+			System.err.println("Connection refused. You need to initiate a server first.");
+		}
+		catch ( ClassNotFoundException e ) {
+			System.err.println("Class not found");
 		}
 		catch(UnknownHostException unknownHost){
 			System.err.println("You are trying to connect to an unknown host!");
@@ -71,6 +90,18 @@ public class peerProcessClient {
 			catch(IOException ioException){
 				ioException.printStackTrace();
 			}
+		}
+	}
+	//send a message to the output stream
+	void sendMessage(String msg)
+	{
+		try{
+			//stream write the message
+			out.writeObject(msg);
+			out.flush();
+		}
+		catch(IOException ioException){
+			ioException.printStackTrace();
 		}
 	}
 
