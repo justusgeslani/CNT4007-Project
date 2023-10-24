@@ -25,6 +25,10 @@ public class peerProcess {
         public String listenPort;               // Listening port
         public String hasFileOrNoFile;          // Has file or not
 
+        // Properties derived from above properties
+
+        public ArrayList<Integer> bitfield;     // Bitfield
+
 
         // Default constructor for peerProcess
         public peerProcess(String pID) {
@@ -96,9 +100,9 @@ public class peerProcess {
 
                 }
         }
-        
 
-        // Reads the contents of PeerInfo.cfg and assigns the corret values to variables for this peer process
+
+        // Reads the contents of PeerInfo.cfg and assigns the correct values to variables for this peer process
         public void getPeerInfo() {
                 try{
 
@@ -161,6 +165,23 @@ public class peerProcess {
 
                 }
 
+        }
+
+
+        // Checks the hasFileOrNoFile variable and sets the bitfield appropriately
+        public void setBitfield() {
+                // If hasFileOrNoFile equals 1, we set all the bits in the bitfield to 1
+                if (Objects.equals(hasFileOrNoFile, "1")) {
+                        for (int i =0; i < Integer.parseInt(numberOfPieces); i++) {
+                                bitfield.add(1);
+                        }
+                }
+                // Otherwise, we set all the bits in the bitfield to 0
+                else {
+                        for (int i =0; i < Integer.parseInt(numberOfPieces); i++) {
+                                bitfield.add(0);
+                        }
+                }
         }
 
         // ---------- Getters for Common.cfg properties ----------
@@ -244,6 +265,7 @@ public class peerProcess {
                         peerProcess start = new peerProcess(args[0]);
                         start.getCommonInfo();
                         start.getPeerInfo();
+                        start.setBitfield();
 
                 }
                 catch (Exception ex) {
