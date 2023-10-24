@@ -8,12 +8,12 @@ public class peerProcess {
 
         // The common properties used by all peers in Common.cfg are:
 
-        public String numPreferNeighbors;       // NumberOfPreferredNeighbors
-        public String uInterval;                // UnchokingInterval
-        public String optimistUInterval;        // OptimisticUnchokingInterval
-        public String fileName;                 // FileName
-        public String fileSize;                 // FileSize
-        public String pieceSize;                // PieceSize
+        public static String numPreferNeighbors;       // NumberOfPreferredNeighbors
+        public static String uInterval;                // UnchokingInterval
+        public static String optimistUInterval;        // OptimisticUnchokingInterval
+        public static String fileName;                 // FileName
+        public static String fileSize;                 // FileSize
+        public static String pieceSize;                // PieceSize
 
         public String numberOfPieces;           // Number of pieces in this file
         public String sizeOfLastPiece;          // Size of last piece in this file
@@ -28,6 +28,8 @@ public class peerProcess {
         // Properties derived from above properties
 
         public ArrayList<Integer> bitfield = new ArrayList<Integer>();     // Bitfield
+
+        public static ArrayList<Integer> availablePeerServers = new ArrayList<Integer>();       // Keep track of peer process servers that are up and available
 
 
         // Default constructor for peerProcess
@@ -267,8 +269,10 @@ public class peerProcess {
                         start.getPeerInfo();
                         start.setBitfield();
 
-                        peerProcessClient client = new peerProcessClient(start.hostName, Integer.parseInt(start.listenPort));
-			client.run();
+                        peerProcessServer server = new peerProcessServer(Integer.parseInt(start.listenPort));
+                        server.run();
+
+
 
                 }
                 catch (Exception ex) {

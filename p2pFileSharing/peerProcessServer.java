@@ -24,6 +24,9 @@ public class peerProcessServer {
 		System.out.println("The server is running.");
         try (ServerSocket listener = new ServerSocket(sPort)) {
             int clientNum = 1;
+			// Add the server to the static array list to keep track of what servers are available!
+			// So new peer processes know which servers to contact to connect to!
+			peerProcess.availablePeerServers.add(sPort);
             while (true) {
                 new Handler(listener.accept(), clientNum).start();
                 System.out.println("Client " + clientNum + " is connected!");
