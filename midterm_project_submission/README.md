@@ -1,4 +1,4 @@
-For the midterm submission, our team has is deep into the project. However, not all functionality has been implemented.
+For the midterm submission, our team has is still diving deep into the project. However, not all functionality has been implemented.
 
 To run the current implementation:
 - compile the peerProcess.java, using 'javac peerProcess.java' and run that file.
@@ -10,3 +10,6 @@ Many classes are still in implementation and are not complete, such as:
 
 Currently, our team has accomplished connecting various peers, provided a "Common.cfg" and "PeerInfo.cfg".
 More functionality is still in the works, thank you!
+
+
+- Group 34, Justus Geslani, John Midel Miclat, Kevin Zhang
