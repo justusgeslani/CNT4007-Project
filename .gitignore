@@ -1,4 +1,3 @@
-p2pFileSharing/out/*
-p2pFileSharing/p2pFileSharing.iml
+out/
 .idea/
 CNT4007-Project.iml
