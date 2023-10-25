@@ -33,6 +33,10 @@ public class peerProcessClient {
 
 	}
 
+	public peerProcessClient() {
+
+	}
+
 	// Constructor for peer process client, uses host name and listening port number
 	public peerProcessClient(String host, int lPort) {
 
@@ -44,6 +48,7 @@ public class peerProcessClient {
 	// Run method for running peer process client
 	void run()
 	{
+		for
 		try{
 			//create a socket to connect to the server
 			requestSocket = new Socket(this.hostName, this.cPort);

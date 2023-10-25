@@ -3,49 +3,25 @@ import java.io.*;
 import java.util.*;
 
 public class peerProcess {
-
-        // In this project, the peer process should read two configuration files: Common.cfg and PeerInfo.cfg
-
-        // The common properties used by all peers in Common.cfg are:
-
         public static String numPreferNeighbors;       // NumberOfPreferredNeighbors
         public static String uInterval;                // UnchokingInterval
         public static String optimistUInterval;        // OptimisticUnchokingInterval
         public static String fileName;                 // FileName
         public static String fileSize;                 // FileSize
         public static String pieceSize;                // PieceSize
-
         public String numberOfPieces;           // Number of pieces in this file
         public String sizeOfLastPiece;          // Size of last piece in this file
-
-        // The peer info properties in PeerInfo.cfg are:
-
         public String peerID;                   // Peer ID
         public String hostName;                 // Host name
         public String listenPort;               // Listening port
         public String hasFileOrNoFile;          // Has file or not
-
-        // Properties derived from above properties
-
         public ArrayList<Integer> bitfield = new ArrayList<Integer>();     // Bitfield
-
         public static ArrayList<Map.Entry<String, Integer>> availablePeerServers = new ArrayList<>();       // Keep track of peer process servers that are up and available
-
 
         // Default constructor for peerProcess
         public peerProcess(String pID) {
 
                 peerID = pID;
-        }
-
-        // Constructor for peerProcess to initialize properties of PeerInfo.cfg
-        public peerProcess(String pID, String host, String lPort, String fileOrNoFile) {
-
-                peerID = pID;
-                hostName = host;
-                listenPort = lPort;
-                hasFileOrNoFile = fileOrNoFile;
-
         }
 
         // Reads the contents of Common.cfg and assigns the values to variables for this peer process
@@ -194,95 +170,24 @@ public class peerProcess {
                 }
         }
 
-        // ---------- Getters for Common.cfg properties ----------
-
-        // Returns the number of preferred neighbors, e.g. 3
-        public String getPreferredNeighbors() {
-
-                return numPreferNeighbors;
-
-        }
-
-        // Returns the unchoking interval, e.g. 5
-        public String getUnchokingInterval() {
-
-                return uInterval;
-
-        }
-
-        // Returns the optimistic unchoking interval, e.g. 10
-        public String getOptimistUnchokingInterval() {
-
-                return optimistUInterval;
-
-        }
-
-        // Returns the file name, e.g. thefile
-        public String getFileName() {
-
-                return fileName;
-
-        }
-
-        // Returns the file size, e.g. 2167705
-        public String getFileSize() {
-
-                return fileSize;
-
-        }
-
-        // Returns the piece size, e.g. 16384
-        public String getPieceSize() {
-
-                return pieceSize;
-
-        }
-
-        // ---------- Getters for PeerInfo.cfg properties ----------
-
-        // Returns the peer ID, e.g. 1002
-        public String getPeerID() {
-
-                return peerID;
-
-        }
-
-        // Returns the host name, e.g. lin114-01.cise.ufl.edu
-        public String getHostName() {
-
-                return hostName;
-
-        }
-
-        // Returns the listening port, e.g. 6001
-        public String getListeningPort() {
-
-                return listenPort;
-
-        }
-
-        // Returns has file or no file, e.g. 0 or 1
-        public String getFileOrNoFile() {
-
-                return hasFileOrNoFile;
-
-        }
 
         public static void main(String[] args) {
 
                 try {
 
-                        peerProcess start = new peerProcess(args[0]);
-                        start.getCommonInfo();
-                        start.getPeerInfo();
-                        start.setBitfield();
+                        peerProcess peer = new peerProcess(args[0]);
+                        peer.getCommonInfo();
+                        peer.getPeerInfo();
+                        peer.setBitfield();
 
 
                         if (!availablePeerServers.isEmpty()) {
-                                for (Map.Entry<String, Integer> peerServer : availablePeerServers) {
-                                        peerProcessClient client = new peerProcessClient(peerServer.getKey(), peerServer.getValue());
-                                        client.run();
-                                }
+//                                for (Map.Entry<String, Integer> peerServer : availablePeerServers) {
+//                                        peerProcessClient client = new peerProcessClient(peerServer.getKey(), peerServer.getValue());
+//                                        client.run();
+//                                }
+                                peerProcessClient client = new peerProcessClient();
+                                client.run();
                         }
                         else {
                                 peerProcessServer server = new peerProcessServer(Integer.parseInt(start.listenPort));
