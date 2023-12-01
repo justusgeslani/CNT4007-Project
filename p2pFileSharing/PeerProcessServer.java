@@ -5,15 +5,19 @@ import java.io.*;
 
 public class PeerProcessServer implements Runnable {
 	private ServerSocket socketListener;
+	private PeerProcess process;
 
-	public peerProcessServer(ServerSocket listener) {
+	public PeerProcessServer(ServerSocket listener, PeerProcess process) {
 		socketListener = listener;
+		this.process = process;
 	}
 
 	public void run() {
         try {
             Socket neighborPeer = socketListener.accept();
-			peerManager neighborManager = new peerManaer()
+			PeerManager neighborManager = new PeerManager(neighborPeer, process.getpID());
+			Thread processServerThread = new Thread(neighborManager);
+			processServerThread.start();
         }
 		catch(IOException ioException){
 			ioException.printStackTrace();

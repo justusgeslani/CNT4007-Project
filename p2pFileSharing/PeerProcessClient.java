@@ -26,14 +26,14 @@ public class PeerProcessClient {
 
 
 	// Default constructor for peer process client
-	public peerProcessClient() { }
+	public PeerProcessClient() { }
 
-	public peerProcessClient() {
+	public PeerProcessClient() {
 
 	}
 
 	// Constructor for peer process client, uses host name and listening port number
-	public peerProcessClient(String host, int lPort) {
+	public PeerProcessClient(String host, int lPort) {
 		this.hostName = host;
 		this.cPort = lPort;
 	}
