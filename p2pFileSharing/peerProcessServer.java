@@ -14,10 +14,8 @@ public class peerProcessServer implements Runnable {
             Socket neighborPeer = socketListener.accept();
 
         }
-		catch (IOException ioException) {
-		}
-		catch (Exception e) {
-			e.printStackTrace();
+		catch(IOException ioException){
+			ioException.printStackTrace();
 		}
 	}
 }
