@@ -3,14 +3,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-public class peerManager implements Runnable {
+public class PeerManager implements Runnable {
     private Socket socketListener;
     private ObjectOutputStream out;
     private ObjectInputStream in;
     private HandShakeMessage hsmsg;
     private boolean madeConnection = false;
 
-    public peerManager(Socket listener, String pID) {
+    public PeerManager(Socket listener, String pID) {
         socketListener = listener; // Assign listener
 
         // Create input and output streams
