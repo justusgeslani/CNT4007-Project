@@ -33,7 +33,14 @@ public class CommonConfig {
         return pieceSize;
     }
 
-    public void loadCommonFile() {
+    public int calculatePieceCount() {
+        int length = fileSize / pieceSize;
+        if (fileSize % pieceSize != 0) {
+            length++;
+        }
+        return length;
+    }
+    public void loadConfigFile() {
         try (FileReader file = new FileReader("Common.cfg");
              Scanner fileReader = new Scanner(file)) {
 
@@ -76,29 +83,4 @@ public class CommonConfig {
         }
     }
 
-    public class ConfigDTO {
-        private final int numberOfPreferredNeighbors;
-        private final int unchokingInterval;
-        private final int optimisticUnchokingInterval;
-        private final String fileName;
-        private final int fileSize;
-        private final int pieceSize;
-        private ConfigDTO() {
-            this.numberOfPreferredNeighbors = CommonConfig.this.numberOfPreferredNeighbors;
-            this.unchokingInterval = CommonConfig.this.unchokingInterval;
-            this.optimisticUnchokingInterval = CommonConfig.this.optimisticUnchokingInterval;
-            this.fileName = CommonConfig.this.fileName;
-            this.fileSize = CommonConfig.this.fileSize;
-            this.pieceSize = CommonConfig.this.pieceSize;
-        }
-        public int getNumberOfPreferredNeighbors() { return numberOfPreferredNeighbors; }
-        public int getUnchokingInterval() { return unchokingInterval; }
-        public int getOptimisticUnchokingInterval() { return optimisticUnchokingInterval; }
-        public String getFileName() { return fileName; }
-        public int getFileSize() { return fileSize; }
-        public int getPieceSize() { return pieceSize; }
-    }
-    public ConfigDTO createConfigDTO() {
-        return new ConfigDTO();
-    }
 }
