@@ -38,6 +38,18 @@ public class PeerManager implements Runnable {
                     hsmsg = hsmsg.readHandShakeMessage(returnhs);
                     madeConnection = true;
                 }
+                else {
+                    byte[] msgLength = new byte[4];
+                    in.readFully(msgLength);
+                    int len = 0;
+                    for (byte b : msgLength) { len = (len << 8) + (b & 0xFF); }
+                    byte[] actualMsg = new byte[len];
+                    in.readFully(actualMsg);
+                    char type = (char) actualMsg[0];
+
+
+
+                }
             }
         }
         catch(IOException ioException){
