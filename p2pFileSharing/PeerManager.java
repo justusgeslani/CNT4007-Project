@@ -45,7 +45,8 @@ public class PeerManager implements Runnable {
                     for (byte b : msgLength) { len = (len << 8) + (b & 0xFF); }
                     byte[] actualMsg = new byte[len];
                     in.readFully(actualMsg);
-                    char type = (char) actualMsg[0];
+                    ActualMessage.MessageType messageType = getMessageType(actualMsg);
+                    ActualMessage acmsg = new ActualMessage(messageType);
 
 
 
@@ -55,5 +56,21 @@ public class PeerManager implements Runnable {
         catch(IOException ioException){
             ioException.printStackTrace();
         }
+    }
+
+    private ActualMessage.MessageType getMessageType(byte[] actualMsg) {
+        char type = (char) actualMsg[0];
+        ActualMessage.MessageType messageType = switch (type) {
+            case '0' -> ActualMessage.MessageType.CHOKE;
+            case '1' -> ActualMessage.MessageType.UNCHOKE;
+            case '2' -> ActualMessage.MessageType.INTERESTED;
+            case '3' -> ActualMessage.MessageType.NOT_INTERESTED;
+            case '4' -> ActualMessage.MessageType.HAVE;
+            case '5' -> ActualMessage.MessageType.BITFIELD;
+            case '6' -> ActualMessage.MessageType.REQUEST;
+            case '7' -> ActualMessage.MessageType.PIECE;
+            default -> null;
+        };
+        return messageType;
     }
 }
