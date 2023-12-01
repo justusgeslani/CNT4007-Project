@@ -1,10 +1,7 @@
 import java.net.*;
 import java.io.*;
-import java.nio.*;
-import java.nio.channels.*;
-import java.util.*;
 
-public class peerProcessClient {
+public class PeerProcessClient {
 
 	// socket connect to the server
 	Socket requestSocket;

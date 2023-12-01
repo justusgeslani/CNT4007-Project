@@ -2,7 +2,8 @@ import java.net.*;
 import java.io.*;
 
 
-public class peerProcessServer implements Runnable {
+
+public class PeerProcessServer implements Runnable {
 	private ServerSocket socketListener;
 
 	public peerProcessServer(ServerSocket listener) {
@@ -12,7 +13,7 @@ public class peerProcessServer implements Runnable {
 	public void run() {
         try {
             Socket neighborPeer = socketListener.accept();
-
+			peerManager neighborManager = new peerManaer()
         }
 		catch(IOException ioException){
 			ioException.printStackTrace();
