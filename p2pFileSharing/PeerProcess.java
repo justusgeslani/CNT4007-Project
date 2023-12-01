@@ -75,7 +75,7 @@ public class PeerProcess {
 //        public static ArrayList<Map.Entry<String, Integer>> availablePeerServers = new ArrayList<>();       // Keep track of peer process servers that are up and available
 
         // Default constructor for peerProcess
-        public peerProcess(String pID) {
+        public PeerProcess(String pID) {
                 this.peerId = pID;
         }
 
