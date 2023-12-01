@@ -1,5 +1,3 @@
-package src;
-
 import java.io.*;
 import java.util.*;
 
@@ -76,5 +74,31 @@ public class CommonConfig {
         catch (IOException ex) {
             System.out.println("Error reading the file: " + ex.getMessage());
         }
+    }
+
+    public class ConfigDTO {
+        private final int numberOfPreferredNeighbors;
+        private final int unchokingInterval;
+        private final int optimisticUnchokingInterval;
+        private final String fileName;
+        private final int fileSize;
+        private final int pieceSize;
+        private ConfigDTO() {
+            this.numberOfPreferredNeighbors = CommonConfig.this.numberOfPreferredNeighbors;
+            this.unchokingInterval = CommonConfig.this.unchokingInterval;
+            this.optimisticUnchokingInterval = CommonConfig.this.optimisticUnchokingInterval;
+            this.fileName = CommonConfig.this.fileName;
+            this.fileSize = CommonConfig.this.fileSize;
+            this.pieceSize = CommonConfig.this.pieceSize;
+        }
+        public int getNumberOfPreferredNeighbors() { return numberOfPreferredNeighbors; }
+        public int getUnchokingInterval() { return unchokingInterval; }
+        public int getOptimisticUnchokingInterval() { return optimisticUnchokingInterval; }
+        public String getFileName() { return fileName; }
+        public int getFileSize() { return fileSize; }
+        public int getPieceSize() { return pieceSize; }
+    }
+    public ConfigDTO createConfigDTO() {
+        return new ConfigDTO();
     }
 }
