@@ -29,16 +29,12 @@ public class peerProcessClient {
 
 
 	// Default constructor for peer process client
-	public peerProcessClient() {
-
-	}
+	public peerProcessClient() { }
 
 	// Constructor for peer process client, uses host name and listening port number
 	public peerProcessClient(String host, int lPort) {
-
 		this.hostName = host;
 		this.cPort = lPort;
-
 	}
 
 	// Run method for running peer process client
@@ -169,9 +165,8 @@ public class peerProcessClient {
 		}
 
 		//send a message to the output stream
-		void sendMessage(String msg)
-		{
-			try{
+		void sendMessage(String msg) {
+			try {
 				//stream write the message
 				out.writeObject(msg);
 				out.flush();
@@ -180,7 +175,5 @@ public class peerProcessClient {
 				ioException.printStackTrace();
 			}
 		}
-
-
 	}
 }
