@@ -111,33 +111,22 @@ public class peerProcess {
                                                 
                                                 this.hasFileOrNoFile = myScanner.next();
                                                 System.out.println("Has file or not: " + hasFileOrNoFile);
-                                                
                                                 myScanner.useDelimiter("\\s+");
                                                 System.out.println();
-                                                
                                                 break;
                                         }
                                         else {
                                                 
                                                 System.out.println("Peer ID: " + pID);
                                                 System.out.println("----- This peer ID does not match current peer process -----");
-
                                                 String hostName = myScanner.next();
-
                                                 System.out.println("Host name: " + hostName);
-                                                
                                                 myScanner.useDelimiter("\\s+");
-
                                                 String listenPort = myScanner.next();
-
                                                 System.out.println("Listening port: " + listenPort);
-                                                
                                                 myScanner.useDelimiter("\\s+");
-
                                                 System.out.println("Has file or not: " + myScanner.next());
-                                                
                                                 myScanner.useDelimiter("\\s+");
-
                                                 // Add the server to the static array list to keep track of what servers are available!
                                                 // So new peer processes know which servers to contact to connect to!
                                                 peerProcess.availablePeerServers.add(Map.entry(hostName, Integer.parseInt(listenPort)));
@@ -146,11 +135,8 @@ public class peerProcess {
                         }
                 }
                 catch (Exception ex) {
-
                         System.out.println(ex.toString());
-
                 }
-
         }
 
 
@@ -174,7 +160,6 @@ public class peerProcess {
         public static void main(String[] args) {
 
                 try {
-
                         peerProcess peer = new peerProcess(args[0]);
                         peer.getCommonInfo();
                         peer.getPeerInfo();
@@ -182,28 +167,19 @@ public class peerProcess {
 
 
                         if (!availablePeerServers.isEmpty()) {
-//                                for (Map.Entry<String, Integer> peerServer : availablePeerServers) {
-//                                        peerProcessClient client = new peerProcessClient(peerServer.getKey(), peerServer.getValue());
-//                                        client.run();
-//                                }
-                                peerProcessClient client = new peerProcessClient();
-                                client.run();
+                                for (Map.Entry<String, Integer> peerServer : availablePeerServers) {
+                                        peerProcessClient client = new peerProcessClient(peerServer.getKey(), peerServer.getValue());
+                                        client.run();
+                                }
                         }
                         else {
                                 peerProcessServer server = new peerProcessServer(Integer.parseInt(start.listenPort));
                                 server.run();
                         }
-
-
-
                 }
                 catch (Exception ex) {
-
                         System.out.println(ex);
-
                 }
-
         }
-
 }
 
