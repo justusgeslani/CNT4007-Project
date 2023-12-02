@@ -60,6 +60,13 @@ public class PeerProcess {
         }
 
         public String getPeerID() { return this.peerID; }
+        public void addConnectedNeighbor(String connectedPeerID, PeerManager pm) {
+                this.connectedNeighbors.put(connectedPeerID, pm);
+        }
+
+        public void addConnectedThread(String connectedPeerID, Thread t) {
+                this.connectedThreads.put(connectedPeerID, t);
+        }
 
         public static void main(String[] args) {
                 //might need to make another driver function

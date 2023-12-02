@@ -5,13 +5,16 @@ import java.net.Socket;
 
 public class PeerManager implements Runnable {
     private Socket socketListener;
+    private PeerProcess process;
     private ObjectOutputStream out;
     private ObjectInputStream in;
     private HandShakeMessage hsmsg;
+    private String correspondentPeerID;
     private boolean madeConnection = false;
 
-    public PeerManager(Socket listener, String pID) {
+    public PeerManager(Socket listener, String pID, PeerProcess process) {
         socketListener = listener; // Assign listener
+        this.process = process; // Assign the particular process
 
         // Create input and output streams
         try {
@@ -38,6 +41,13 @@ public class PeerManager implements Runnable {
                     byte[] returnhs = new byte[32];
                     in.readFully(returnhs);
                     hsmsg = hsmsg.readHandShakeMessage(returnhs);
+                    // Get the peer ID of the corresponding peer from the handshake message
+                    this.correspondentPeerID = hsmsg.getPeerID();
+                    // Add the connected neighbor into the hash map with the corresponding peer ID and the current peer manager
+                    this.process.addConnectedNeighbor(this.correspondentPeerID, this);
+                    // Add the current thread into the hash map with the corresponding peer ID
+                    this.process.addConnectedThread(this.correspondentPeerID, Thread.currentThread());
+
                     madeConnection = true;
                 }
                 else {
@@ -62,7 +72,7 @@ public class PeerManager implements Runnable {
                 }
             }
         }
-        catch(IOException ioException){
+        catch (IOException ioException){
             ioException.printStackTrace();
         }
     }
