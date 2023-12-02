@@ -111,6 +111,14 @@ public class PeerManager implements Runnable {
     private void handleMessage(ActualMessage.MessageType type) {
         switch (type) {
             case CHOKE:
+                // reset the requested info due to the choke message
+                String[] processRequestedInfo = this.process.getRequestedInfo();
+                for (int i = 0; i < processRequestedInfo.length; i++) {
+                    if (processRequestedInfo[i].equals(this.correspondentPeerID) && processRequestedInfo[i] != null)
+                        processRequestedInfo[i] = null;
+                }
+                // log the choking
+                this.process.getPeerLogger().chokingLog(this.correspondentPeerID);
                 break;
             case UNCHOKE:
                 break;
