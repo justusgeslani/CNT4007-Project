@@ -27,29 +27,38 @@ public class PeerManager implements Runnable {
     }
     public void run() {
         try {
+            // Create the handshake message byte array and send it out
             byte[] msg = hsmsg.buildHandShakeMessage();
             out.write(msg);
             out.flush();
 
             while (true) {
                 if (!madeConnection) {
+                    // Create a 32-byte array to encapsulate the returned handshake message
                     byte[] returnhs = new byte[32];
                     in.readFully(returnhs);
                     hsmsg = hsmsg.readHandShakeMessage(returnhs);
                     madeConnection = true;
                 }
                 else {
+                    // Create a 4-byte array to encapsulate the message length header from the actual message
                     byte[] msgLength = new byte[4];
                     in.readFully(msgLength);
+                    // Create a len variable to store the message length gathered from the header
                     int len = 0;
+                    // Convert the byte array to an int
                     for (byte b : msgLength) { len = (len << 8) + (b & 0xFF); }
+                    // Read the actual message, as we now know the message length
                     byte[] actualMsg = new byte[len];
                     in.readFully(actualMsg);
+                    // Gather the message type with the written method
                     ActualMessage.MessageType messageType = getMessageType(actualMsg);
-                    ActualMessage acmsg = new ActualMessage(messageType);
+                    // TODO CHECK THE FOLLOWING TWO STATEMENTS, seems there are discrepancies between this and ActualMessage.java
+                    ActualMessage acmsg = new ActualMessage(messageType, actualMsg);
+                    acmsg.readActualMessage(len, actualMsg);
 
-
-
+                    // Method to handle the message based on the type
+                    handleMessage(messageType);
                 }
             }
         }
@@ -72,5 +81,28 @@ public class PeerManager implements Runnable {
             default -> null;
         };
         return messageType;
+    }
+
+    private void handleMessage(ActualMessage.MessageType type) {
+        switch (type) {
+            case CHOKE:
+                break;
+            case UNCHOKE:
+                break;
+            case INTERESTED:
+                break;
+            case NOT_INTERESTED:
+                break;
+            case HAVE:
+                break;
+            case BITFIELD:
+                break;
+            case REQUEST:
+                break;
+            case PIECE:
+                break;
+            default:
+                System.out.println("Message received is not any of the types!");
+        }
     }
 }
