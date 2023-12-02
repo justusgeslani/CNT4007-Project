@@ -1,10 +1,10 @@
 public class PeerConfigManager {
     private final CommonConfig commonConfig;
-    private final PeerInfoConfig peerInfoConfig;
+    private final PeerInfoManager peerInfoConfig;
 
     public PeerConfigManager() {
         this.commonConfig = new CommonConfig();
-        this.peerInfoConfig = new PeerInfoConfig();
+        this.peerInfoConfig = new PeerInfoManager();
         loadConfigurations();
     }
 
@@ -17,7 +17,7 @@ public class PeerConfigManager {
         return commonConfig;
     }
 
-    public PeerInfoConfig getPeerInfoConfig() {
+    public PeerInfoManager getPeerInfoConfig() {
         return peerInfoConfig;
     }
 }
