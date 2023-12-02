@@ -15,7 +15,7 @@ public class PeerProcessServer implements Runnable {
 	public void run() {
         try {
             Socket neighborPeer = socketListener.accept();
-			PeerManager neighborManager = new PeerManager(neighborPeer, process.getpID());
+			PeerManager neighborManager = new PeerManager(neighborPeer, process.getPeerID());
 			Thread processServerThread = new Thread(neighborManager);
 			processServerThread.start();
         }

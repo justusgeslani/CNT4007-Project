@@ -2,12 +2,12 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class PeerInfoConfig {
+public class PeerInfoManager {
 
-    private final HashMap<String, RemotePeerInfo> peerInfoMap;
+    private final HashMap<String, PeerInfo> peerInfoMap;
     private final ArrayList<String> peerList;
 
-    public PeerInfoConfig() {
+    public PeerInfoManager() {
         this.peerInfoMap = new HashMap<>();
         this.peerList = new ArrayList<>();
     }
@@ -18,7 +18,7 @@ public class PeerInfoConfig {
             while ((line = reader.readLine()) != null) {
                 String[] details = line.trim().split("\\s+");
                 if (details.length == 4) {
-                    RemotePeerInfo peerInfo = new RemotePeerInfo(details[0], details[1], details[2], details[3]);
+                    PeerInfo peerInfo = new PeerInfo(details[0], details[1], details[2], details[3]);
                     peerInfoMap.put(details[0], peerInfo);
                     peerList.add(details[0]);
                 }
@@ -28,11 +28,11 @@ public class PeerInfoConfig {
         }
     }
 
-    public RemotePeerInfo getPeerConfig(String peerID) {
+    public PeerInfo getPeerConfig(String peerID) {
         return peerInfoMap.get(peerID);
     }
 
-    public HashMap<String, RemotePeerInfo> getPeerInfoMap() {
+    public HashMap<String, PeerInfo> getPeerInfoMap() {
         return new HashMap<>(peerInfoMap);
     }
 

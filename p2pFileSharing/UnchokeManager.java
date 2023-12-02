@@ -18,6 +18,14 @@ public class UnchokeManager implements Runnable {
     }
 
     public void run() {
+        try {
+            // get a list of the unchoked neighbors
+            // create a new list for the unchoked neighbors
 
+
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
