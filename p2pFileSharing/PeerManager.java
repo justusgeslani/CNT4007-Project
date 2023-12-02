@@ -121,6 +121,7 @@ public class PeerManager implements Runnable {
                 this.process.getPeerLogger().chokingLog(this.correspondentPeerID);
                 break;
             case UNCHOKE:
+
                 break;
             case INTERESTED:
                 break;

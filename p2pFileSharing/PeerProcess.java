@@ -19,6 +19,7 @@ public class PeerProcess {
         private ArrayList<String> availableNeighbors = new ArrayList<>();
         private volatile HashMap<String, PeerManager> connectedNeighbors = new HashMap<>();
         private volatile HashMap<String, Thread> connectedThreads = new HashMap<>();
+        private volatile HashMap<String, BitSet> neighborsPieces = new HashMap<>();
 
         // Threaded Variables
         private volatile String[] requestedInfo;
@@ -47,6 +48,21 @@ public class PeerProcess {
                 // Initialization logic here
                 this.peerInfo = this.peerInfoMap.get(this.peerID);
                 this.availableNeighbors = this.peerInfoManager.getPeerList();
+
+                // For each peer, initialize each of their bitsets
+                this.peerInfoMap.forEach((key, value) -> {
+                        BitSet availablePieces = new BitSet(this.pieceCount);
+                        // If the peer contains the file, set the entire bitset to true
+                        if (this.peerInfoMap.get(key).containsFile()) {
+                                availablePieces.set(0, this.pieceCount);
+                                this.neighborsPieces.put(key, availablePieces);
+                        }
+                        // Otherwise set it to false
+                        else {
+                                availablePieces.set(0, this.pieceCount, false);
+                                this.neighborsPieces.put(key, availablePieces);
+                        }
+                });
 
         }
 
