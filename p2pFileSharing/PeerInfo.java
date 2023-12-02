@@ -1,7 +1,7 @@
 public class PeerInfo {
-        private String peerId;
-        private String peerAddress;
-        private int peerPort;
+        private final String peerId;
+        private final String peerAddress;
+        private final int peerPort;
         private boolean containsFile;
 
         public PeerInfo(String pId, String pAddress, String pPort) {

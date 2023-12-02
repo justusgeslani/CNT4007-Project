@@ -1,5 +1,6 @@
 // To compile: Use javac peerProcess.java
 import java.io.*;
+import java.net.ServerSocket;
 import java.net.SocketException;
 import java.rmi.Remote;
 import java.util.*;
@@ -12,6 +13,7 @@ public class PeerProcess {
         private PeerConfigManager configs;
         private PeerInfo peerInfo;
         private int pieceCount;
+        private Thread peerServerThread;
 
         // Variables regarding the neighboring peers
         private ArrayList<String> availableNeighbors = new ArrayList<>();
@@ -41,14 +43,18 @@ public class PeerProcess {
 
         private void initialize() {
                 // Initialization logic here
+                this.peerInfo = this.peerInfoMap.get(this.peerID);
+                this.availableNeighbors = this.peerInfoManager.getPeerList();
 
         }
 
-        public void openServer() {
+        public void runServer() {
                 try {
-
+                        ServerSocket serverSocket = new ServerSocket(this.peerInfo.getPeerPort());
+                        this.peerServerThread = new Thread(new PeerProcessServer(serverSocket, this));
+                        this.peerServerThread.start();
                 }
-                catch (SocketException e) {
+                catch (IOException e) {
                         e.printStackTrace();
                 }
         }
