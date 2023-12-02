@@ -5,12 +5,13 @@ import java.net.Socket;
 
 public class PeerManager implements Runnable {
     private Socket socketListener;
-    private PeerProcess process;
+    private final PeerProcess process;
     private ObjectOutputStream out;
     private ObjectInputStream in;
     private HandShakeMessage hsmsg;
     private String correspondentPeerID;
     private boolean madeConnection = false;
+    private boolean prompter = false; // If this peer is the one prompting the handshake
 
     public PeerManager(Socket listener, String pID, PeerProcess process) {
         socketListener = listener; // Assign listener
@@ -37,18 +38,7 @@ public class PeerManager implements Runnable {
 
             while (true) {
                 if (!madeConnection) {
-                    // Create a 32-byte array to encapsulate the returned handshake message
-                    byte[] returnhs = new byte[32];
-                    in.readFully(returnhs);
-                    hsmsg = hsmsg.readHandShakeMessage(returnhs);
-                    // Get the peer ID of the corresponding peer from the handshake message
-                    this.correspondentPeerID = hsmsg.getPeerID();
-                    // Add the connected neighbor into the hash map with the corresponding peer ID and the current peer manager
-                    this.process.addConnectedNeighbor(this.correspondentPeerID, this);
-                    // Add the current thread into the hash map with the corresponding peer ID
-                    this.process.addConnectedThread(this.correspondentPeerID, Thread.currentThread());
-
-                    madeConnection = true;
+                    establishConnection();
                 }
                 else {
                     // Create a 4-byte array to encapsulate the message length header from the actual message
@@ -91,6 +81,31 @@ public class PeerManager implements Runnable {
             default -> null;
         };
         return messageType;
+    }
+
+    private void establishConnection() {
+        try {
+            // Create a 32-byte array to encapsulate the returned handshake message
+            byte[] returnhs = new byte[32];
+            in.readFully(returnhs);
+            hsmsg = hsmsg.readHandShakeMessage(returnhs);
+            // Get the peer ID of the corresponding peer from the handshake message
+            this.correspondentPeerID = hsmsg.getPeerID();
+            // Add the connected neighbor into the hash map with the corresponding peer ID and the current peer manager
+            this.process.addConnectedNeighbor(this.correspondentPeerID, this);
+            // Add the current thread into the hash map with the corresponding peer ID
+            this.process.addConnectedThread(this.correspondentPeerID, Thread.currentThread());
+
+            madeConnection = true;
+
+            if (this.prompter)
+                this.process.getPeerLogger().peerToPeerTCPLog(this.correspondentPeerID);
+            else
+                this.process.getPeerLogger().peerFromPeerTCPLog(this.correspondentPeerID);
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
     }
 
     private void handleMessage(ActualMessage.MessageType type) {

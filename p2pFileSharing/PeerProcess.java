@@ -26,6 +26,7 @@ public class PeerProcess {
         // Miscellaneous variables
         private PeerInfoManager peerInfoManager;
         private HashMap<String, PeerInfo> peerInfoMap;
+        private PeerProcessLog peerLogger;
 
         public PeerProcess(String peerID) {
                 this.peerID = peerID;
@@ -33,6 +34,7 @@ public class PeerProcess {
                 this.configs = new PeerConfigManager();
                 this.peerInfoManager = this.configs.getPeerInfoConfig();
                 this.peerInfoMap = this.peerInfoManager.getPeerInfoMap();
+                this.peerLogger = new PeerProcessLog(peerID);
 
                 this.pieceCount = configs.getCommonConfig().calculatePieceCount();
                 this.requestedInfo = new String[this.pieceCount];
@@ -60,6 +62,7 @@ public class PeerProcess {
         }
 
         public String getPeerID() { return this.peerID; }
+        public PeerProcessLog getPeerLogger() { return this.peerLogger; }
         public void addConnectedNeighbor(String connectedPeerID, PeerManager pm) {
                 this.connectedNeighbors.put(connectedPeerID, pm);
         }
