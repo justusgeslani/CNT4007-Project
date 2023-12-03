@@ -51,9 +51,24 @@ public class ActualMessage {
 
     public void readActualMessage(int len, byte[] message) {
         this.messageLength = len;
-        this.messageType = MessageType.values()[message[LENGTH_SIZE]]; // Correctly get MessageType
+        //this.messageType = MessageType.values()[message[LENGTH_SIZE]]; // Correctly get MessageType
+        //this.messageType = (char) message[0];
+        this.messageType = switch ((char) message[0]) {
+            case '0' -> ActualMessage.MessageType.CHOKE;
+            case '1' -> ActualMessage.MessageType.UNCHOKE;
+            case '2' -> ActualMessage.MessageType.INTERESTED;
+            case '3' -> ActualMessage.MessageType.NOT_INTERESTED;
+            case '4' -> ActualMessage.MessageType.HAVE;
+            case '5' -> ActualMessage.MessageType.BITFIELD;
+            case '6' -> ActualMessage.MessageType.REQUEST;
+            case '7' -> ActualMessage.MessageType.PIECE;
+            default -> null;
+        };
+        byte[] temp = new byte[this.messageLength - 1];
+        System.arraycopy(message, 1, temp, 0, this.messageLength - 1);
+        this.messagePayload = temp;
         // Adjust starting index for payload extraction
-        this.messagePayload = Arrays.copyOfRange(message, TYPE_SIZE, TYPE_SIZE + this.messageLength - LENGTH_SIZE - TYPE_SIZE);
+        //this.messagePayload = Arrays.copyOfRange(message, TYPE_SIZE, TYPE_SIZE + this.messageLength - LENGTH_SIZE - TYPE_SIZE);
     }
 
     public int extractIntFromByteArray(byte[] message, int start) {

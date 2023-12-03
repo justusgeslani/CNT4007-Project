@@ -32,7 +32,7 @@ public class OptimisticUnchokeManager implements Runnable{
         this.peerProcess = pProcess;
         this.optInterval = pProcess.getOptmisticUnchokeInterval();
         this.scheduler = Executors.newScheduledThreadPool(1);
-     }
+    }
 
     /**
      * Start the scheduled task of optimistically unchoking peers.

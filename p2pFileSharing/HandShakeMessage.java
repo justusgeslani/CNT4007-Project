@@ -40,7 +40,7 @@ public class HandShakeMessage {
         return handshakeBytes;
     }
 
-    public HandShakeMessage readHandShakeMessage(byte[] messageBytes) {
+    public static HandShakeMessage readHandShakeMessage(byte[] messageBytes) {
         if (messageBytes.length != HEADER_LENGTH + ZERO_BITS_LENGTH + PEER_ID_LENGTH) {
             throw new IllegalArgumentException("Invalid handshake message length");
         }
