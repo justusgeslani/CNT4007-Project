@@ -13,14 +13,21 @@ public class PeerProcessServer implements Runnable {
 	}
 
 	public void run() {
-        try {
-            Socket neighborPeer = socketListener.accept();
-			PeerManager neighborManager = new PeerManager(neighborPeer, process.getPeerID(), this.process);
-			Thread processServerThread = new Thread(neighborManager);
-			processServerThread.start();
-        }
-		catch(IOException ioException){
-			ioException.printStackTrace();
+		while (true) {
+			try {
+				Socket neighborPeer = socketListener.accept();
+				PeerManager neighborManager = new PeerManager(neighborPeer, process.getPeerID(), this.process);
+				Thread processServerThread = new Thread(neighborManager);
+				processServerThread.start();
+			}
+			catch(IOException ioException){
+				ioException.printStackTrace();
+				break;
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+				break;
+			}
 		}
 	}
 }
