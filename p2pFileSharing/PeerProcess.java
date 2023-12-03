@@ -108,6 +108,17 @@ public class PeerProcess {
         public HashSet<String> getInterestedNeighbors() { return this.interestedNeighbors; }
         public int getPieceCount() { return this.pieceCount; }
         public PeerInfo getPeerInfo() { return this.peerInfo; }
+        public CommonConfig getCommonConfig() { return this.configs.getCommonConfig(); }
+        public RandomAccessFile getFile() { return this.file; }
+        public HashMap<String, PeerManager> getConnectedNeighbors() { return this.connectedNeighbors; }
+
+        public boolean allFinished() {
+                for (Map.Entry<String, BitSet> entry : neighborsPieces.entrySet()) {
+                        if (entry.getValue().cardinality() != this.pieceCount)
+                                return false;
+                }
+                return true;
+        }
 
         public void addConnectedNeighbor(String connectedPeerID, PeerManager pm) {
                 this.connectedNeighbors.put(connectedPeerID, pm);

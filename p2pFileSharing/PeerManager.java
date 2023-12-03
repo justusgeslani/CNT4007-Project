@@ -13,6 +13,7 @@ public class PeerManager implements Runnable {
     private HandShakeMessage hsmsg;
     private String correspondentPeerID;
     private String peerID;
+    private int downloadRate = 0;
     private boolean madeConnection = false;
     private boolean prompter = false; // If this peer is the one prompting the handshake
 
@@ -125,43 +126,10 @@ public class PeerManager implements Runnable {
                 this.process.getPeerLogger().chokingLog(this.correspondentPeerID);
                 break;
             case UNCHOKE:
-                BitSet correspondentPieces = this.process.getNeighborsPieces().get(this.correspondentPeerID);
-                BitSet myPieces = this.process.getNeighborsPieces().get(this.peerID);
+                // Check if this peer is interested in one of the corresponding peer's pieces
+                // and send a request or not interested message based on the result
+                checkRequestsAndSendMsg();
 
-                // See if we desire a piece from the corresponding peer
-                // If we do, set the index of the requestedInfo array to the peer ID of the corresponding peer
-                int desiredPiece = -1;
-                for (int i = 0; i < this.process.getPieceCount() && i < correspondentPieces.size(); i++) {
-                    if (correspondentPieces.get(i) && !myPieces.get(i) && this.process.getRequestedInfo()[i] == null) {
-                        this.process.getRequestedInfo()[i] = this.correspondentPeerID;
-                        desiredPiece = i;
-                        break;
-                    }
-                }
-
-                // If we have no desired piece, send a message that we're not interested
-                if (desiredPiece < 0) {
-                    try {
-                        ActualMessage am = new ActualMessage(ActualMessage.MessageType.NOT_INTERESTED);
-                        out.write(am.buildActualMessage());
-                        out.flush();
-                    }
-                    catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-                // Else, send a message that as a request for the desired piece
-                else {
-                    try {
-                        byte[] requestPayload = ByteBuffer.allocate(4).putInt(desiredPiece).array();
-                        ActualMessage am = new ActualMessage(ActualMessage.MessageType.REQUEST, requestPayload);
-                        out.write(am.buildActualMessage());
-                        out.flush();
-                    }
-                    catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
                 // log the unchoking
                 this.process.getPeerLogger().unchokingLog(this.correspondentPeerID);
                 break;
@@ -206,8 +174,50 @@ public class PeerManager implements Runnable {
                 pieceIndex = acmsg.getPieceIndexFromPayload();
                 byte[] receivedPiece = acmsg.getPieceFromPayload();
 
+                // Write the receivedPiece to the file
+                try {
+                    int pos = this.process.getCommonConfig().getPieceSize() * pieceIndex;
+                    this.process.getFile().seek(pos);
+                    this.process.getFile().write(receivedPiece);
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
 
+                // Update the neighborsPieces map, now with this peer having received the additional piece
+                this.process.getNeighborsPieces().get(this.peerID).set(pieceIndex);
 
+                // Increase the download rate for this thread/peer
+                this.downloadRate += 1;
+
+                // Get number of finished pieces
+                int numFinishedPieces = this.process.getNeighborsPieces().get(this.peerID).cardinality();
+                // Log that this peer has downloaded the piece
+                this.process.getPeerLogger().downloadPieceLog(pieceIndex, numFinishedPieces, this.peerID);
+                // Update the requested info array so that we no longer require the piece in the pieceIndex
+                this.process.getRequestedInfo()[pieceIndex] = null;
+                // Have the peer broadcast "have" messages to all connected neighbors
+                broadcastHaveMsgs(pieceIndex);
+
+                if (this.process.getNeighborsPieces().get(this.peerID).cardinality() != this.process.getPieceCount()) {
+                    // Check if this peer is interested in one of the corresponding peer's pieces
+                    // and send a request or not interested message based on the result
+                    checkRequestsAndSendMsg();
+                }
+                else {
+                    this.process.getPeerLogger().downloadCompleteLog();
+                    // TODO implement all done check, then cancel choke check
+
+                    // Send a not interested message
+                    try {
+                        ActualMessage am = new ActualMessage(ActualMessage.MessageType.NOT_INTERESTED);
+                        out.write(am.buildActualMessage());
+                        out.flush();
+                    }
+                    catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
                 break;
             default:
                 System.out.println("Message received is not any of the types!");
@@ -250,6 +260,66 @@ public class PeerManager implements Runnable {
             }
         }
     }
+
+    private void checkRequestsAndSendMsg() {
+        BitSet correspondentPieces = this.process.getNeighborsPieces().get(this.correspondentPeerID);
+        BitSet myPieces = this.process.getNeighborsPieces().get(this.peerID);
+
+        // See if we desire a piece from the corresponding peer
+        // If we do, set the index of the requestedInfo array to the peer ID of the corresponding peer
+        int desiredPiece = -1;
+        for (int i = 0; i < this.process.getPieceCount() && i < correspondentPieces.size(); i++) {
+            if (correspondentPieces.get(i) && !myPieces.get(i) && this.process.getRequestedInfo()[i] == null) {
+                this.process.getRequestedInfo()[i] = this.correspondentPeerID;
+                desiredPiece = i;
+                break;
+            }
+        }
+
+        // If we have no desired piece, send a message that we're not interested
+        if (desiredPiece < 0) {
+            try {
+                ActualMessage am = new ActualMessage(ActualMessage.MessageType.NOT_INTERESTED);
+                out.write(am.buildActualMessage());
+                out.flush();
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        // Else, send a message that as a request for the desired piece
+        else {
+            try {
+                byte[] requestPayload = ByteBuffer.allocate(4).putInt(desiredPiece).array();
+                ActualMessage am = new ActualMessage(ActualMessage.MessageType.REQUEST, requestPayload);
+                out.write(am.buildActualMessage());
+                out.flush();
+            }
+            catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+
+    private void broadcastHaveMsgs (int pieceIndex) {
+        this.process.getConnectedNeighbors().forEach((key, value) -> {
+            value.sendHaveMsgs(pieceIndex);
+        });
+    }
+
+    private void sendHaveMsgs(int pieceIndex) {
+        try {
+            byte[] requestPayload = ByteBuffer.allocate(4).putInt(pieceIndex).array();
+            ActualMessage am = new ActualMessage(ActualMessage.MessageType.HAVE, requestPayload);
+            out.write(am.buildActualMessage());
+            out.flush();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }
 
 
