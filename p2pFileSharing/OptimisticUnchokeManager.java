@@ -77,7 +77,7 @@ public class OptimisticUnchokeManager implements Runnable{
             }
 
             if (interestedNeighbors.isEmpty() && this.peerProcess.allFinished()) {
-                this.peerProcess.cancelChoke(); //TODO implement kill chokes
+                this.peerProcess.stopChokes();
             }
 
         } catch (Exception e) {
