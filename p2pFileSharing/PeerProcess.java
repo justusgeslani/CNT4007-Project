@@ -84,6 +84,7 @@ public class PeerProcess {
         public HashMap<String, BitSet> getNeighborsPieces() { return this.neighborsPieces; }
         public HashSet<String> getInterestedNeighbors() { return this.interestedNeighbors; }
         public int getPieceCount() { return this.pieceCount; }
+        public PeerInfo getPeerInfo() { return this.peerInfo; }
 
         public void addConnectedNeighbor(String connectedPeerID, PeerManager pm) {
                 this.connectedNeighbors.put(connectedPeerID, pm);

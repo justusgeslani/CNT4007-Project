@@ -179,44 +179,28 @@ public class PeerManager implements Runnable {
                 int pieceIndex = acmsg.getPieceIndexFromPayload();
                 this.process.getNeighborsPieces().get(this.correspondentPeerID).set(pieceIndex);
                 // TODO CANCEL ALL CHOKING IF ALL PEERS ARE DONE
-                BitSet correspondentPieces = this.process.getNeighborsPieces().get(this.correspondentPeerID);
-                BitSet myPieces = this.process.getNeighborsPieces().get(this.peerID);
+                correspondentPieces = this.process.getNeighborsPieces().get(this.correspondentPeerID);
+                myPieces = this.process.getNeighborsPieces().get(this.peerID);
 
-                // See if we desire a piece from the corresponding peer
-                // If we do, set the boolean for desire to true
-                boolean desirePiece = false;
-                for (int i = 0; i < this.process.getPieceCount() && i < correspondentPieces.size(); i++) {
-                    if (correspondentPieces.get(i) && !myPieces.get(i)) {
-                        this.process.getRequestedInfo()[i] = this.correspondentPeerID;
-                        desirePiece = true;
-                        break;
-                    }
-                }
+                // Check if this peer is interested in the corresponding peer's pieces
+                // and send an interested or not message based on the result
+                checkInterestAndSendMsg();
 
-                if (desirePiece) {
-                    try {
-                        ActualMessage am = new ActualMessage(ActualMessage.MessageType.INTERESTED);
-                        out.write(am.buildActualMessage());
-                        out.flush();
-                    }
-                    catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-                else {
-                    try {
-                        ActualMessage am = new ActualMessage(ActualMessage.MessageType.NOT_INTERESTED);
-                        out.write(am.buildActualMessage());
-                        out.flush();
-                    }
-                    catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
                 // log that we received the "have" message
                 this.process.getPeerLogger().receiveHaveLog(pieceIndex, this.correspondentPeerID);
                 break;
             case BITFIELD:
+                BitSet bitfield = acmsg.getBitFieldMessage();
+                // replace the bitfield of the correspondent in the neighborsPieces map
+                this.process.getNeighborsPieces().remove(this.correspondentPeerID);
+                this.process.getNeighborsPieces().put(this.correspondentPeerID, bitfield);
+
+                boolean haveFile = this.process.getPeerInfo().containsFile();
+                if (!haveFile) {
+                    // Check if this peer is interested in the corresponding peer's pieces
+                    // and send an interested or not message based on the result
+                    checkInterestAndSendMsg();
+                }
                 break;
             case REQUEST:
                 break;
@@ -226,4 +210,40 @@ public class PeerManager implements Runnable {
                 System.out.println("Message received is not any of the types!");
         }
     }
+
+    private void checkInterestAndSendMsg() {
+        // See if we desire a piece from the corresponding peer
+        // If we do, set the boolean for desire to true
+        boolean desirePiece = false;
+        for (int i = 0; i < this.process.getPieceCount() && i < correspondentPieces.size(); i++) {
+            if (correspondentPieces.get(i) && !myPieces.get(i)) {
+                this.process.getRequestedInfo()[i] = this.correspondentPeerID;
+                desirePiece = true;
+                break;
+            }
+        }
+
+        if (desirePiece) {
+            try {
+                ActualMessage am = new ActualMessage(ActualMessage.MessageType.INTERESTED);
+                out.write(am.buildActualMessage());
+                out.flush();
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        else {
+            try {
+                ActualMessage am = new ActualMessage(ActualMessage.MessageType.NOT_INTERESTED);
+                out.write(am.buildActualMessage());
+                out.flush();
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }
+
+
