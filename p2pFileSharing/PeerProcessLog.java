@@ -191,5 +191,15 @@ public class PeerProcessLog {
         logMessage.log(Level.INFO, message);
     }
 
-
+    public void stopLogger() {
+        try {
+            if (this.peerFileHandler != null) {
+                this.peerFileHandler.close();
+            }
+        }
+        catch (Exception e) {
+            System.out.println("Couldn't close the logger");
+            e.printStackTrace();
+        }
+    }
 }

@@ -16,6 +16,8 @@ public class PeerProcess {
         private int pieceCount;
         private Thread peerServerThread;
         private volatile RandomAccessFile file;
+        private volatile ServerSocket serverSocket;
+        private volatile boolean everythingDone = false;
 
         // Variables regarding the neighboring peers
         private ArrayList<String> availableNeighbors = new ArrayList<>();
@@ -111,7 +113,7 @@ public class PeerProcess {
 
         public void runServer() {
                 try {
-                        ServerSocket serverSocket = new ServerSocket(this.peerInfo.getPeerPort());
+                        this.serverSocket = new ServerSocket(this.peerInfo.getPeerPort());
                         this.peerServerThread = new Thread(new PeerProcessServer(serverSocket, this));
                         this.peerServerThread.start();
                 }
@@ -196,9 +198,13 @@ public class PeerProcess {
                         this.optimisticUnchokeNeighbor = null;
                         this.interestedNeighbors.clear();
                         this.file.close();
-//                        this.getPeerLogger()
-
-
+                        this.getPeerLogger().stopLogger();
+                        this.serverSocket.close();
+                        if (this.peerServerThread != null) {
+                                this.peerServerThread.interrupt();
+                        }
+                        this.everythingDone = true;
+                        this.terminateManager.startTask(10);
 
                 }
                 catch (Exception e) {
@@ -224,6 +230,10 @@ public class PeerProcess {
 
         public void clearUnchokedNeighbors() {
                 this.unchokedNeighbors.clear();
+        }
+
+        public boolean stopEverything() {
+                return this.everythingDone;
         }
 
         public static void main(String[] args) {
