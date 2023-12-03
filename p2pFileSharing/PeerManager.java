@@ -203,6 +203,11 @@ public class PeerManager implements Runnable {
             case REQUEST:
                 break;
             case PIECE:
+                pieceIndex = acmsg.getPieceIndexFromPayload();
+                byte[] receivedPiece = acmsg.getPieceFromPayload();
+
+
+
                 break;
             default:
                 System.out.println("Message received is not any of the types!");

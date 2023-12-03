@@ -14,6 +14,7 @@ public class PeerProcess {
         private PeerInfo peerInfo;
         private int pieceCount;
         private Thread peerServerThread;
+        private volatile RandomAccessFile file;
 
         // Variables regarding the neighboring peers
         private ArrayList<String> availableNeighbors = new ArrayList<>();
@@ -41,14 +42,37 @@ public class PeerProcess {
                 this.pieceCount = configs.getCommonConfig().calculatePieceCount();
                 this.requestedInfo = new String[this.pieceCount];
 
+                try {
+                        initialize();
+                }
+                catch (IOException ioException) {
+                        ioException.printStackTrace();
+                }
 
-                initialize();
         }
 
-        private void initialize() {
+        private void initialize() throws IOException {
                 // Initialization logic here
                 this.peerInfo = this.peerInfoMap.get(this.peerID);
                 this.availableNeighbors = this.peerInfoManager.getPeerList();
+
+                // Create directory for the peer
+                if ((new File("peer_" + this.peerID)).mkdir()) {
+                        String fileName = this.configs.getCommonConfig().getFileName();
+                        File temp = new File("peer_" + this.peerID + "/" + fileName);
+                        // if this peer doesn't have the file
+                        if (!this.peerInfo.containsFile())
+                                // create a new file for the peer
+                                temp.createNewFile();
+                        // assign a random access file for the peer as one of its attribute variables
+                        this.file = new RandomAccessFile(temp, "rw");
+                        if (!this.peerInfo.containsFile())
+                                // set the length of the file with the file size given by the configs
+                                this.file.setLength(this.configs.getCommonConfig().getFileSize());
+                }
+                else {
+                        System.out.println("Couldn't create " + "peer_" + this.peerID + " file!");
+                }
 
                 // For each peer, initialize each of their bitsets
                 this.peerInfoMap.forEach((key, value) -> {
@@ -64,6 +88,9 @@ public class PeerProcess {
                                 this.neighborsPieces.put(key, availablePieces);
                         }
                 });
+
+
+
 
         }
 
