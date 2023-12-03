@@ -33,7 +33,7 @@ public class ActualMessage {
     public ActualMessage(MessageType messageType, byte[] messagePayload) {
         this.messageType = messageType;
         this.messagePayload = messagePayload;
-        this.messageLength = LENGTH_SIZE + TYPE_SIZE + this.messagePayload.length;
+        this.messageLength = TYPE_SIZE + this.messagePayload.length;
     }
 
     public byte[] buildActualMessage() {
