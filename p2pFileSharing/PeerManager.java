@@ -45,6 +45,19 @@ public class PeerManager implements Runnable {
             while (true) {
                 if (!madeConnection) {
                     establishConnection();
+
+                    if (this.process.getPeerInfo().containsFile() || this.process.getNeighborsPieces().get(this.peerID).cardinality() > 0) {
+                        try {
+                            BitSet myPieces = this.process.getNeighborsPieces().get(this.peerID);
+                            ActualMessage am = new ActualMessage(ActualMessage.MessageType.BITFIELD, myPieces.toByteArray());
+
+                            out.write(am.buildActualMessage());
+                            out.flush();
+                        }
+                        catch (Exception e) {
+
+                        }
+                    }
                 }
                 else {
                     // Create a 4-byte array to encapsulate the message length header from the actual message
@@ -60,7 +73,7 @@ public class PeerManager implements Runnable {
                     // Gather the message type with the written method
                     ActualMessage.MessageType messageType = getMessageType(actualMsg);
                     // TODO CHECK THE FOLLOWING TWO STATEMENTS, seems there are discrepancies between this and ActualMessage.java
-                    ActualMessage acmsg = new ActualMessage(messageType, actualMsg);
+                    ActualMessage acmsg = new ActualMessage(messageType);
                     acmsg.readActualMessage(len, actualMsg);
 
                     // Method to handle the message based on the type
