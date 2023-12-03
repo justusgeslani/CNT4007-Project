@@ -92,11 +92,11 @@ public class OptimisticUnchokeManager implements Runnable{
 
     private void sendUnchokeMessages(String curr, String next) {
         if (next != null) {
-            this.peerProcess.getConnectedNeighbors().get(next).sendUnchokedMessage(); // TODO: implement in peer process
+            this.peerProcess.getConnectedNeighbors().get(next).sendMsg(ActualMessage.MessageType.UNCHOKE);
             this.peerProcess.getPeerLogger().changeOptimisticUnchokedNeighborLog(next);
         }
         if (curr != null && this.peerProcess.getUnchokedNeighbors().contains(curr)) {
-            this.peerProcess.getConnectedNeighbors().get(curr).sendUnchokedMessage(); // TODO: implement in peer process
+            this.peerProcess.getConnectedNeighbors().get(curr).sendMsg(ActualMessage.MessageType.CHOKE);
         }
     }
 
