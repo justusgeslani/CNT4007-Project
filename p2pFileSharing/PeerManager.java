@@ -276,41 +276,39 @@ public class PeerManager implements Runnable {
     }
 
     private void checkInterestAndSendMsg() {
-        BitSet correspondentPieces = this.process.getNeighborsPieces().get(this.correspondentPeerID);
-        BitSet myPieces = this.process.getNeighborsPieces().get(this.peerID);
+        try {
+            BitSet correspondentPieces = this.process.getNeighborsPieces().get(this.correspondentPeerID);
+            BitSet myPieces = this.process.getNeighborsPieces().get(this.peerID);
 
-        // See if we desire a piece from the corresponding peer
-        // If we do, set the boolean for desire to true
-        boolean desirePiece = false;
-        for (int i = 0; i < this.process.getPieceCount() && i < correspondentPieces.size(); i++) {
-            if (correspondentPieces.get(i) && !myPieces.get(i)) {
-                this.process.getRequestedInfo()[i] = this.correspondentPeerID;
-                desirePiece = true;
-                break;
+            boolean desirePiece = false;
+            for (int i = 0; i < this.process.getPieceCount() && i < correspondentPieces.size(); i++) {
+                if (correspondentPieces.get(i) && !myPieces.get(i)) {
+                    this.process.getRequestedInfo()[i] = this.correspondentPeerID;
+                    desirePiece = true;
+                    break;
+                }
             }
-        }
 
-        if (desirePiece) {
-            try {
-                ActualMessage am = new ActualMessage(ActualMessage.MessageType.INTERESTED);
-                out.write(am.buildActualMessage());
-                out.flush();
+            ActualMessage am;
+            if (desirePiece) {
+                am = new ActualMessage(ActualMessage.MessageType.INTERESTED);
+                System.out.println("Sending INTERESTED message to peer: " + this.correspondentPeerID);
+            } else {
+                am = new ActualMessage(ActualMessage.MessageType.NOT_INTERESTED);
+                System.out.println("Sending NOT INTERESTED message to peer: " + this.correspondentPeerID);
             }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        else {
-            try {
-                ActualMessage am = new ActualMessage(ActualMessage.MessageType.NOT_INTERESTED);
-                out.write(am.buildActualMessage());
-                out.flush();
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
+
+            out.write(am.buildActualMessage());
+            out.flush();
+        } catch (IOException e) {
+            System.err.println("IOException occurred while sending message to peer: " + this.correspondentPeerID);
+            e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("Unexpected exception occurred while sending message to peer: " + this.correspondentPeerID);
+            e.printStackTrace();
         }
     }
+
 
     private void checkRequestsAndSendMsg() {
         BitSet correspondentPieces = this.process.getNeighborsPieces().get(this.correspondentPeerID);
