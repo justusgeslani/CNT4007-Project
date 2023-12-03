@@ -24,7 +24,7 @@ public class PeerTerminate implements Runnable {
     public void run() {
         try {
             // Check if this peer and all connected peers are done
-            if (this.peerProcess.allFinished()) {
+            if (this.peerProcess.stopEverything()) {
                 this.peerProcess.stopThreads();
                 this.stopTask();;
             }
