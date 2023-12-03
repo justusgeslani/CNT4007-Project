@@ -38,6 +38,7 @@ public class UnchokeManager implements Runnable {
                     LinkedHashMap<String, Integer> sortedDownloadRates = sortMapByValuesDescending(downloadRates);
                     int counter = 0;
                     Iterator<Map.Entry<String, Integer>> iter = sortedDownloadRates.entrySet().iterator();
+
                     while (iter.hasNext() && counter < maxNeighbors) {
                         Map.Entry<String, Integer> entry = iter.next();
                         String peerID = entry.getKey();
@@ -45,10 +46,37 @@ public class UnchokeManager implements Runnable {
                         if (interestedNeighbors.contains(peerID)) {
                             // Get the PeerManager associated with the interested peerID
                             PeerManager pm = this.process.getConnectedNeighbors().get(peerID);
+
+                            if (oldUnchokedList.contains(peerID)) {
+                                oldUnchokedList.remove(peerID);
+                            }
+                            else {
+                                String optimisticUnchokeNeighbor = this.process.getOptimisticUnchokeNeighbor();
+                                if (!optimisticUnchokeNeighbor.equals(peerID) || optimisticUnchokeNeighbor == null) {
+                                    pm.sendMsg(ActualMessage.MessageType.UNCHOKE);
+                                }
+                            }
+
+                            newUnchokedList.add(peerID);
+                            pm.resetDownloadRate();
+                            counter += 1;
                         }
                     }
 
+                    // Update the unchoked neighbors in the process with the new list
+                    this.process.setUnchokedNeighbors(newUnchokedList);
 
+                    // If the new unchoked list is not empty
+                    if (!newUnchokedList.isEmpty()) {
+                        // Log the changed preferred neighbors
+                        this.process.getPeerLogger().changePreferNeighborLog(new ArrayList<>(newUnchokedList));
+                    }
+
+                    // For each peerID in the old unchoked list, send a choke message
+                    oldUnchokedList.forEach((peerID) -> {
+                        PeerManager pm = this.process.getConnectedNeighbors().get(peerID);
+                        pm.sendMsg(ActualMessage.MessageType.CHOKE);
+                    });
                 }
                 else {
                     for (int i = 0; i < maxNeighbors; i++) {

@@ -132,6 +132,10 @@ public class PeerProcess {
                 this.connectedThreads.put(connectedPeerID, t);
         }
 
+        public void setUnchokedNeighbors(HashSet<String> newUnchokedNeighbors) {
+                this.unchokedNeighbors = newUnchokedNeighbors;
+        }
+
         public static void main(String[] args) {
                 //might need to make another driver function
         }
