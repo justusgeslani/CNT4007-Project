@@ -1,6 +1,9 @@
 // Reference: https://www.geeksforgeeks.org/logging-in-java/
 // Reference: https://www.javatpoint.com/java-get-current-date
 // Reference: https://docs.oracle.com/javase/8/docs/api/java/time/ZoneId.html
+// Reference: https://www.digitalocean.com/community/tutorials/logger-in-java-logging-example
+// Reference: https://docs.oracle.com/javase/8/docs/api/java/util/logging/FileHandler.html
+// Reference: https://docs.oracle.com/javase/8/docs/api/java/util/logging/SimpleFormatter.html
 import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
@@ -8,6 +11,8 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
+import java.util.logging.FileHandler;
+import java.util.logging.SimpleFormatter;
 import java.time.*;
 
 public class PeerProcessLog {
@@ -23,10 +28,32 @@ public class PeerProcessLog {
     public DateTimeFormatter time = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss");
     public String currentTime = time.format(now);
     public String message;
+    public FileHandler peerFileHandler;
+    public String peerLogFile;
+    public String fileName;
 
     public PeerProcessLog(String pID) {
 
         this.peerID = pID;
+
+        this.peerLogFile = peerLogFile(this.peerID);
+
+        try {
+            this.peerFileHandler = new FileHandler(this.peerLogFile);
+            logMessage.setLevel(Level.INFO);
+            this.peerFileHandler.setFormatter(new SimpleFormatter());
+            logMessage.addHandler(this.peerFileHandler);
+
+        }
+        catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+
+    public String peerLogFile(String pID) {
+
+        fileName = "log_peer_" + pID + ".log";
+        return fileName;
     }
 
     public String logMessage(int caseNumber, String pID) {
