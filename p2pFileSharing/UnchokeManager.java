@@ -29,7 +29,7 @@ public class UnchokeManager implements Runnable {
             // If at least one neighbor is interested
             if (interestedNeighbors.size() > 0) {
                 // If this peer has not completed all its pieces
-                if (this.process.getNeighborsPieces().get(this.process.getPeerID()).cardinality != this.process.getPieceCount()) {
+                if (this.process.getNeighborsPieces().get(this.process.getPeerID()).cardinality() != this.process.getPieceCount()) {
                     HashMap<String, Integer> downloadRates = new HashMap<>();
                     this.process.getConnectedNeighbors().forEach((key, value) -> {
                         downloadRates.put(key, value.getDownloadRate());
@@ -62,6 +62,7 @@ public class UnchokeManager implements Runnable {
                                 // Send an unchoke message
                                 try {
                                     ActualMessage am = new ActualMessage(ActualMessage.MessageType.UNCHOKE);
+                                    // TODO FIXME
                                     out.write(am.buildActualMessage());
                                     out.flush();
                                 }
