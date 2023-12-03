@@ -2,6 +2,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.util.BitSet;
 
 public class PeerManager implements Runnable {
     private Socket socketListener;
@@ -10,12 +12,14 @@ public class PeerManager implements Runnable {
     private ObjectInputStream in;
     private HandShakeMessage hsmsg;
     private String correspondentPeerID;
+    private String peerID;
     private boolean madeConnection = false;
     private boolean prompter = false; // If this peer is the one prompting the handshake
 
     public PeerManager(Socket listener, String pID, PeerProcess process) {
         socketListener = listener; // Assign listener
         this.process = process; // Assign the particular process
+        this.peerID = pID;
 
         // Create input and output streams
         try {
@@ -87,7 +91,7 @@ public class PeerManager implements Runnable {
         try {
             // Create a 32-byte array to encapsulate the returned handshake message
             byte[] returnhs = new byte[32];
-            in.readFully(returnhs);
+            in.readFully(returnhs); // Read in the returned handshake message
             hsmsg = hsmsg.readHandShakeMessage(returnhs);
             // Get the peer ID of the corresponding peer from the handshake message
             this.correspondentPeerID = hsmsg.getPeerID();
@@ -121,7 +125,43 @@ public class PeerManager implements Runnable {
                 this.process.getPeerLogger().chokingLog(this.correspondentPeerID);
                 break;
             case UNCHOKE:
+                BitSet correspondentPieces = this.process.getNeighborsPieces().get(this.correspondentPeerID);
+                BitSet myPieces = this.process.getNeighborsPieces().get(this.peerID);
 
+                // See if we desire a piece from the corresponding peer
+                // If we do, set the index of the requestedInfo array to the peer ID of the corresponding peer
+                int desiredPiece = -1;
+                for (int i = 0; i < this.process.getPieceCount() && i < correspondentPieces.size(); i++) {
+                    if (correspondentPieces.get(i) && !myPieces.get(i) && this.process.getRequestedInfo()[i] == null) {
+                        this.process.getRequestedInfo()[i] = this.correspondentPeerID;
+                        desiredPiece = i;
+                        break;
+                    }
+                }
+
+                // If we have no desired piece, send a message that we're not interested
+                if (desiredPiece < 0) {
+                    try {
+                        ActualMessage am = new ActualMessage(ActualMessage.MessageType.NOT_INTERESTED);
+                        out.write(am.buildActualMessage());
+                        out.flush();
+                    }
+                    catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                // Else, send a message that as a request for the desired piece
+                else {
+                    try {
+                        byte[] requestPayload = ByteBuffer.allocate(4).putInt(desiredPiece).array();
+                        ActualMessage am = new ActualMessage(ActualMessage.MessageType.REQUEST, requestPayload);
+                        out.write(am.buildActualMessage());
+                        out.flush();
+                    }
+                    catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
                 break;
             case INTERESTED:
                 break;
