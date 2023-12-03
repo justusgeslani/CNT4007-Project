@@ -73,4 +73,14 @@ public class OptimisticUnchokeManager implements Runnable{
         return null;
     }
 
+    private void sendUnchokeMessages(String curr, String next) {
+        if (next != null) {
+            this.peerProcess.getConnectedNeighbors().get(next).sendUnchokedMessage(); // TODO: implement in peer process
+            this.peerProcess.getPeerLogger().changeOptimisticUnchokedNeighborLog(next);
+        }
+        if (curr != null && this.peerProcess.getUnchokedNeighbors().contains(curr)) {
+            this.peerProcess.getConnectedNeighbors().get(curr).sendUnchokedMessage(); // TODO: implement in peer process
+        }
+    }
+
 }
