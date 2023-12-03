@@ -1,6 +1,7 @@
 // To compile: Use javac peerProcess.java
 import java.io.*;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.SocketException;
 import java.rmi.Remote;
 import java.util.*;
@@ -99,6 +100,13 @@ public class PeerProcess {
                                 this.neighborsPieces.put(key, availablePieces);
                         }
                 });
+
+                try {
+                        this.runServer();
+                        this.connectToNeighbors();
+                } catch (Exception e) {
+                        System.out.println("Error starting server and establishing neighbor connections" + e.toString());
+                }
         }
 
         public void runServer() {
@@ -109,6 +117,34 @@ public class PeerProcess {
                 }
                 catch (IOException e) {
                         e.printStackTrace();
+                }
+        }
+
+        public void connectToNeighbors() {
+                try {
+                        Thread.sleep(5000);
+                        for (String pid : this.availableNeighbors) {
+                                if (pid.equals(this.peerID)) break;
+                                else {
+                                        PeerInfo peer = this.peerInfoMap.get(pid);
+                                        Socket peerSocket = new Socket(peer.getPeerAddress(), peer.getPeerPort());
+
+                                        try {
+                                                PeerManager handler = new PeerManager(peerSocket, pid, this);
+                                                handler.setCorrespondentPeerID(pid);
+                                                this.getConnectedNeighbors().put(pid, handler);
+
+                                                // Start new thread for a neighbor
+                                                Thread peerThread = new Thread(handler);
+                                                this.addConnectedThread(pid, peerThread);
+                                        } catch (Exception e) {
+                                                System.out.println("Error connecting to neighbors " + e.toString());
+                                                peerSocket.close();
+                                        }
+                                }
+                        }
+                } catch (Exception e) {
+                        System.out.println((e.toString()));
                 }
         }
 
@@ -132,6 +168,7 @@ public class PeerProcess {
         public HashMap<String, PeerManager> getConnectedNeighbors() { return this.connectedNeighbors; }
         public HashSet<String> getUnchokedNeighbors() { return this.unchokedNeighbors; }
 	    public String getOptimisticUnchokeNeighbor() { return this.optimisticUnchokeNeighbor; }
+        public int getOptmisticUnchokeInterval() { return this.configs.getCommonConfig().getOptimisticUnchokingInterval(); }
 
         public boolean allFinished() {
                 for (Map.Entry<String, BitSet> entry : neighborsPieces.entrySet()) {
@@ -141,9 +178,11 @@ public class PeerProcess {
                 return true;
         }
 
-        public void stopThreads() {
+        public synchronized void stopThreads() {
                 this.connectedThreads.forEach((key, value) -> {
-                        value.interrupt();
+                        if (value != null) {
+                                value.interrupt();
+                        }
                 });
         }
 

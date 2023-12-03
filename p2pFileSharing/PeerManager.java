@@ -367,6 +367,7 @@ public class PeerManager implements Runnable {
         }
     }
 
+    public void setCorrespondentPeerID(String x) { this.correspondentPeerID = x;}
     public void resetDownloadRate() {
         this.downloadRate = 0;
     }

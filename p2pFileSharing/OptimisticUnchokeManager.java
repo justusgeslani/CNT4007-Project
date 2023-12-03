@@ -29,7 +29,7 @@ public class OptimisticUnchokeManager implements Runnable{
      */
     OptimisticUnchokeManager(PeerProcess pProcess) {
         this.peerProcess = pProcess;
-        this.optInterval = pProcess.getOptmisticUnchokeInterval; //TODO: implement getter
+        this.optInterval = pProcess.getOptmisticUnchokeInterval();
      }
 
     /**
@@ -42,7 +42,7 @@ public class OptimisticUnchokeManager implements Runnable{
     }
 
     /**
-     * Stops the unchoking method.
+     * Cancels scheduledjob, effectively stopping the handler from running.
      */
     public void stopTask() {
         this.scheduler.shutdownNow();
