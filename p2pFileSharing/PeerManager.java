@@ -62,7 +62,7 @@ public class PeerManager implements Runnable {
                     acmsg.readActualMessage(len, actualMsg);
 
                     // Method to handle the message based on the type
-                    handleMessage(messageType);
+                    handleMessage(acmsg, messageType);
                 }
             }
         }
@@ -112,7 +112,7 @@ public class PeerManager implements Runnable {
         }
     }
 
-    private void handleMessage(ActualMessage.MessageType type) {
+    private void handleMessage(ActualMessage acmsg, ActualMessage.MessageType type) {
         switch (type) {
             case CHOKE:
                 // reset the requested info due to the choke message
@@ -176,6 +176,45 @@ public class PeerManager implements Runnable {
                 this.process.getPeerLogger().receiveNotInterestLog(this.correspondentPeerID);
                 break;
             case HAVE:
+                int pieceIndex = acmsg.getPieceIndexFromPayload();
+                this.process.getNeighborsPieces().get(this.correspondentPeerID).set(pieceIndex);
+                // TODO CANCEL ALL CHOKING IF ALL PEERS ARE DONE
+                BitSet correspondentPieces = this.process.getNeighborsPieces().get(this.correspondentPeerID);
+                BitSet myPieces = this.process.getNeighborsPieces().get(this.peerID);
+
+                // See if we desire a piece from the corresponding peer
+                // If we do, set the boolean for desire to true
+                boolean desirePiece = false;
+                for (int i = 0; i < this.process.getPieceCount() && i < correspondentPieces.size(); i++) {
+                    if (correspondentPieces.get(i) && !myPieces.get(i)) {
+                        this.process.getRequestedInfo()[i] = this.correspondentPeerID;
+                        desirePiece = true;
+                        break;
+                    }
+                }
+
+                if (desirePiece) {
+                    try {
+                        ActualMessage am = new ActualMessage(ActualMessage.MessageType.INTERESTED);
+                        out.write(am.buildActualMessage());
+                        out.flush();
+                    }
+                    catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                else {
+                    try {
+                        ActualMessage am = new ActualMessage(ActualMessage.MessageType.NOT_INTERESTED);
+                        out.write(am.buildActualMessage());
+                        out.flush();
+                    }
+                    catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                // log that we received the "have" message
+                this.process.getPeerLogger().receiveHaveLog(pieceIndex, this.correspondentPeerID);
                 break;
             case BITFIELD:
                 break;
