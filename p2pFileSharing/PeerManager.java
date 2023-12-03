@@ -31,6 +31,7 @@ public class PeerManager implements Runnable {
         }
         catch(IOException ioException) {
             ioException.printStackTrace();
+            System.out.println("ERROR CREATING PEERMANAGER");
         }
 
         hsmsg = new HandShakeMessage(pID);
@@ -55,6 +56,7 @@ public class PeerManager implements Runnable {
                             out.flush();
                         }
                         catch (Exception e) {
+                            System.out.println("ERROR BUILDING BITFIELD MESSAGE");
 
                         }
                     }
@@ -83,6 +85,7 @@ public class PeerManager implements Runnable {
         }
         catch (IOException ioException){
             ioException.printStackTrace();
+            System.out.println("ERROR RUNNING PEER MANAGER");
         }
     }
 
@@ -124,6 +127,7 @@ public class PeerManager implements Runnable {
         }
         catch (IOException ioException) {
             ioException.printStackTrace();
+            System.out.println("ERROR ESTABLISHING CONNECTION");
         }
     }
 
@@ -211,10 +215,12 @@ public class PeerManager implements Runnable {
                         }
                         catch (Exception e) {
                             e.printStackTrace();
+                            System.out.println("ERROR SENDING REQUEST MESSAGE");
                         }
 
                     }
                     catch (IOException e) {
+                        System.out.println("ERROR RECEIVING REQUEST MESSAGE");
                         throw new RuntimeException(e);
                     }
 
@@ -231,6 +237,7 @@ public class PeerManager implements Runnable {
                     this.process.getFile().write(receivedPiece);
                 }
                 catch (Exception e) {
+                    System.out.println("ERROR RECEIVING PIECE MESSAGE");
                     e.printStackTrace();
                 }
 
