@@ -88,10 +88,6 @@ public class PeerProcess {
                                 this.neighborsPieces.put(key, availablePieces);
                         }
                 });
-
-
-
-
         }
 
         public void runServer() {
