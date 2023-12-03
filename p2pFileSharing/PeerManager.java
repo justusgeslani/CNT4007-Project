@@ -147,7 +147,9 @@ public class PeerManager implements Runnable {
             case HAVE:
                 int pieceIndex = acmsg.getPieceIndexFromPayload();
                 this.process.getNeighborsPieces().get(this.correspondentPeerID).set(pieceIndex);
-                // TODO CANCEL ALL CHOKING IF ALL PEERS ARE DONE
+                // Cancel chokes if all peers are done
+                if(process.allFinished())
+                    this.process.stopChokes();
 
                 // Check if this peer is interested in the corresponding peer's pieces
                 // and send an interested or not message based on the result
