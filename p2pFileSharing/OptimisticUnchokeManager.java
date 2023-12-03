@@ -72,7 +72,7 @@ public class OptimisticUnchokeManager implements Runnable{
                 this.peerProcess.setOptimisticUnchokeNeighbor(null);
             }
 
-            if (currentOptimisticUnchoked != null && this.peerProcess.getUnchokedNeighbors().contains(curr)) {
+            if (currentOptimisticUnchoked != null && this.peerProcess.getUnchokedNeighbors().contains(currentOptimisticUnchoked)) {
                 this.peerProcess.getConnectedNeighbors().get(currentOptimisticUnchoked).sendMsg(ActualMessage.MessageType.CHOKE);
             }
 
