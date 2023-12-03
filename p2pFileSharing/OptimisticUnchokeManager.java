@@ -33,6 +33,10 @@ public class OptimisticUnchokeManager implements Runnable{
         this.task = this.scheduler.scheduleAtFixedRate(this, 10, this.optInterval, TimeUnit.SECONDS);
     }
 
+    public void stopTask() {
+        this.scheduler.shutdownNow();
+    }
+
     @Override
     public void run() {
         try {
