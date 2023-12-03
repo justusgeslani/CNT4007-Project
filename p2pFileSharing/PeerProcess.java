@@ -136,6 +136,10 @@ public class PeerProcess {
                 this.unchokedNeighbors = newUnchokedNeighbors;
         }
 
+        public void clearUnchokedNeighbors() {
+                this.unchokedNeighbors.clear();
+        }
+
         public static void main(String[] args) {
                 //might need to make another driver function
         }

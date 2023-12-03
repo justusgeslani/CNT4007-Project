@@ -108,7 +108,17 @@ public class UnchokeManager implements Runnable {
                 }
             }
             else {
+                this.process.clearUnchokedNeighbors();
 
+                // For each peerID in the old unchoked list, send a choke message
+                oldUnchokedList.forEach((peerID) -> {
+                    PeerManager pm = this.process.getConnectedNeighbors().get(peerID);
+                    pm.sendMsg(ActualMessage.MessageType.CHOKE);
+                });
+
+                if (this.process.allFinished()) {
+                    // TODO stop all the choking
+                }
             }
 
         }
