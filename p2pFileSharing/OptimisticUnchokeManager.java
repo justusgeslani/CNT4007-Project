@@ -49,6 +49,23 @@ public class OptimisticUnchokeManager implements Runnable{
 
             String nextOptimisticUnchoked = selectRandomNeighbor(interestedNeighbors);
 
+            // If the length of the interested neighbors is none or no optimistic neighbor can be found
+            if (nextOptimisticUnchoked == null) {
+                String currentOptimisticUnchoked = this.peerProcess.getOptimisticUnchokeNeighbor();
+                this.peerProcess.setOptimisticUnchokeNeighbor(null);
+
+                if (currentOptimisticUnchoked != null && !this.peerProcess.getUnchokedNeighbors().contains(currentOptimisticUnchoked)) {
+                    PeerManager pm = this.peerProcess.getConnectedNeighbors().get(currentOptimisticUnchoked);
+                    pm.sendMsg(ActualMessage.MessageType.CHOKE);
+                }
+
+                if (this.peerProcess.allFinished()) {
+                    // TODO HAVE IMPLEMENTATION TO KILL CHOKES
+                }
+
+
+            }
+
             //this.peerProcess.setOptimisticUnhokedNeighbor(nextOptimisticUnchoked); // TODO: implement setter
 
             // TODO: send unchoked messages
