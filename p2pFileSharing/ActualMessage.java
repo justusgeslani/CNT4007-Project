@@ -53,7 +53,7 @@ public class ActualMessage {
         this.messageLength = len;
         this.messageType = MessageType.values()[message[LENGTH_SIZE]]; // Correctly get MessageType
         // Adjust starting index for payload extraction
-        this.messagePayload = Arrays.copyOfRange(message, TYPE_SIZE, TYPE_SIZE + this.messageLength - LENGTH_SIZE - TYPE_SIZE)
+        this.messagePayload = Arrays.copyOfRange(message, TYPE_SIZE, TYPE_SIZE + this.messageLength - LENGTH_SIZE - TYPE_SIZE);
     }
 
     public int extractIntFromByteArray(byte[] message, int start) {
