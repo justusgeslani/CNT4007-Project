@@ -2,6 +2,7 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class UnchokeManager implements Runnable {
     private PeerProcess process;
@@ -13,8 +14,8 @@ public class UnchokeManager implements Runnable {
 
     UnchokeManager(PeerProcess process) {
         this.process = process;
-        // unchokingInterval
-        // numberOfPreferredNeighbors
+        this.unchokingInterval = process.getCommonConfig().getUnchokingInterval();
+        this.numberOfPreferredNeighbors = process.getCommonConfig().getNumberOfPreferredNeighbors();
     }
 
     public void run() {
@@ -142,5 +143,12 @@ public class UnchokeManager implements Runnable {
         }
 
         return temp;
+    }
+
+    public void startTask() {
+        this.task = this.scheduler.scheduleAtFixedRate(this, 10, this.unchokingInterval, TimeUnit.SECONDS);
+    }
+    public void stopTask() {
+        this.scheduler.shutdownNow();
     }
 }

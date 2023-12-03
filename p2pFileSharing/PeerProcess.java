@@ -32,6 +32,9 @@ public class PeerProcess {
         private PeerInfoManager peerInfoManager;
         private HashMap<String, PeerInfo> peerInfoMap;
         private PeerProcessLog peerLogger;
+        private volatile OptimisticUnchokeManager optUnchokeManager;
+        private volatile UnchokeManager unchokeManager;
+        private volatile PeerTerminate terminateManager;
 
         public PeerProcess(String peerID) {
                 this.peerID = peerID;
@@ -51,6 +54,12 @@ public class PeerProcess {
                         ioException.printStackTrace();
                 }
 
+                this.optUnchokeManager = new OptimisticUnchokeManager(this);
+                this.unchokeManager = new UnchokeManager(this);
+                this.terminateManager = new PeerTerminate(this);
+
+                this.unchokeManager.startTask();
+                this.optUnchokeManager.startTask();
         }
 
         private void initialize() throws IOException {
@@ -136,6 +145,24 @@ public class PeerProcess {
                 this.connectedThreads.forEach((key, value) -> {
                         value.interrupt();
                 });
+        }
+
+        public synchronized void stopChokes() {
+                try {
+                        this.optUnchokeManager.stopTask();
+                        this.unchokeManager.stopTask();
+                        this.clearUnchokedNeighbors();
+                        this.optimisticUnchokeNeighbor = null;
+                        this.interestedNeighbors.clear();
+                        this.file.close();
+//                        this.getPeerLogger()
+
+
+
+                }
+                catch (Exception e) {
+                        e.printStackTrace();
+                }
         }
 
         public void addConnectedNeighbor(String connectedPeerID, PeerManager pm) {
