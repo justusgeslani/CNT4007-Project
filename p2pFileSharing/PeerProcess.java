@@ -144,6 +144,10 @@ public class PeerProcess {
                 this.unchokedNeighbors = newUnchokedNeighbors;
         }
 
+        public void setOptimisticUnchokeNeighbor (String newOptimisticUnchokeNeighbor) {
+                this.optimisticUnchokeNeighbor = newOptimisticUnchokeNeighbor;
+        }
+
         public void clearUnchokedNeighbors() {
                 this.unchokedNeighbors.clear();
         }
