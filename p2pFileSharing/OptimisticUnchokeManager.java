@@ -37,7 +37,7 @@ public class OptimisticUnchokeManager implements Runnable{
      * Method schedules the run method to be called at fixed (arbitrary) intervals.
      */
     public void startTask() {
-        // TODO: idk what the initial delay should be
+        // Arbitrary initial delay
         this.task = this.scheduler.scheduleAtFixedRate(this, 10, this.optInterval, TimeUnit.SECONDS);
     }
 
@@ -77,7 +77,7 @@ public class OptimisticUnchokeManager implements Runnable{
             }
 
             if (interestedNeighbors.isEmpty() && this.peerProcess.allFinished()) {
-                this.peerProcess.cancelChoke(); //TODO implement kill chokes
+                this.peerProcess.stopChokes();
             }
 
         } catch (Exception e) {

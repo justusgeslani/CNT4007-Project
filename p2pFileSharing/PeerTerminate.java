@@ -34,7 +34,7 @@ public class PeerTerminate implements Runnable {
     }
 
     public void startTask(int interval) {
-        // TODO: check if correct parameters
+        // Arbitrary initial delay value
         this.task = scheduler.scheduleAtFixedRate(this, 30, interval, TimeUnit.SECONDS);
     }
 

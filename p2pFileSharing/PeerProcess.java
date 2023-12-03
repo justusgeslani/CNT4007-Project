@@ -141,12 +141,14 @@ public class PeerProcess {
                                                 this.addConnectedThread(pid, peerThread);
                                         } catch (Exception e) {
                                                 System.out.println("Error connecting to neighbors " + e.toString());
-                                                peerSocket.close();
+                                                peerSocket.close(); // Prevent resource leaks
                                         }
                                 }
                         }
+                } catch (InterruptedException e){
+                        Thread.currentThread().interrupt(); // Proper way to handle interrupted exceptions
                 } catch (Exception e) {
-                        System.out.println((e.toString()));
+                        e.printStackTrace();
                 }
         }
 
