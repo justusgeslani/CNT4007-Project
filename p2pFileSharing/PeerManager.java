@@ -179,8 +179,6 @@ public class PeerManager implements Runnable {
                 int pieceIndex = acmsg.getPieceIndexFromPayload();
                 this.process.getNeighborsPieces().get(this.correspondentPeerID).set(pieceIndex);
                 // TODO CANCEL ALL CHOKING IF ALL PEERS ARE DONE
-                correspondentPieces = this.process.getNeighborsPieces().get(this.correspondentPeerID);
-                myPieces = this.process.getNeighborsPieces().get(this.peerID);
 
                 // Check if this peer is interested in the corresponding peer's pieces
                 // and send an interested or not message based on the result
@@ -212,6 +210,9 @@ public class PeerManager implements Runnable {
     }
 
     private void checkInterestAndSendMsg() {
+        BitSet correspondentPieces = this.process.getNeighborsPieces().get(this.correspondentPeerID);
+        BitSet myPieces = this.process.getNeighborsPieces().get(this.peerID);
+
         // See if we desire a piece from the corresponding peer
         // If we do, set the boolean for desire to true
         boolean desirePiece = false;
