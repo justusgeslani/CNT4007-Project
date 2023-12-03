@@ -23,6 +23,7 @@ public class PeerProcess {
         private volatile HashMap<String, BitSet> neighborsPieces = new HashMap<>();
         private volatile HashSet<String> interestedNeighbors = new HashSet<>();
         private volatile HashSet<String> unchokedNeighbors = new HashSet<>();
+	    private volatile String optimisticUnchokeNeighbor = new String();
 
         // Threaded Variables
         private volatile String[] requestedInfo;
@@ -113,6 +114,7 @@ public class PeerProcess {
         public RandomAccessFile getFile() { return this.file; }
         public HashMap<String, PeerManager> getConnectedNeighbors() { return this.connectedNeighbors; }
         public HashSet<String> getUnchokedNeighbors() { return this.unchokedNeighbors; }
+	    public String getOptimisticUnchokeNeighbor() { return this.optimisticUnchokeNeighbor; }
 
         public boolean allFinished() {
                 for (Map.Entry<String, BitSet> entry : neighborsPieces.entrySet()) {
