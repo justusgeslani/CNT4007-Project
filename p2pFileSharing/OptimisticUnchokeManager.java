@@ -1,6 +1,7 @@
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -17,7 +18,7 @@ public class OptimisticUnchokeManager implements Runnable{
     private final Random rnd = new Random();
 
     // Scheduler
-    private final ScheduledExecutorService scheduler = null;
+    private ScheduledExecutorService scheduler;
 
     // Next preferred neighbor (?)
     private ScheduledFuture<?> task = null;
@@ -30,6 +31,7 @@ public class OptimisticUnchokeManager implements Runnable{
     OptimisticUnchokeManager(PeerProcess pProcess) {
         this.peerProcess = pProcess;
         this.optInterval = pProcess.getOptmisticUnchokeInterval();
+        this.scheduler = Executors.newScheduledThreadPool(1);
      }
 
     /**
