@@ -91,6 +91,13 @@ public class PeerProcess {
                                 this.neighborsPieces.put(key, availablePieces);
                         }
                 });
+
+                try {
+                        this.runServer();
+                        this.connectToNeighbors();
+                } catch (Exception e) {
+                        System.out.println("Error starting server and establishing neighbor connections" + e.toString());
+                }
         }
 
         public void runServer() {
