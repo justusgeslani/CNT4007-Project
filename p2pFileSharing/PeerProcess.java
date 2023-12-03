@@ -82,13 +82,13 @@ public class PeerProcess {
 
                 // Create directory for the peer
                 // Directory path
-                String directoryPath = "peer_" + this.peerID;
+                String directoryPath = "" + this.peerID;
                 File directory = new File(directoryPath);
 
-                // Delete the directory if it exists
-                if (directory.exists()) {
-                        deleteDirectory(directory);
-                }
+//                // Delete the directory if it exists
+//                if (directory.exists()) {
+//                        deleteDirectory(directory);
+//                }
 
                 // Create the directory
                 if (directory.mkdir()) {
@@ -96,9 +96,9 @@ public class PeerProcess {
                         File temp = new File(directoryPath + "/" + fileName);
 
                         // Create a new file for the peer if it doesn't have the file
-                        if (!this.peerInfo.containsFile()) {
-                                temp.createNewFile();
-                        }
+//                        if (!this.peerInfo.containsFile()) {
+//                                temp.createNewFile();
+//                        }
 
                         // Assign a random access file for the peer
                         this.file = new RandomAccessFile(temp, "rw");
