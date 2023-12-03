@@ -10,7 +10,7 @@ public class PeerTerminate implements Runnable {
      */
 
     private final PeerProcess peerProcess;
-    private ScheduledExecutorService scheduler = null;
+    private ScheduledExecutorService scheduler;
     private ScheduledFuture<?> task = null;
 
 
@@ -25,7 +25,8 @@ public class PeerTerminate implements Runnable {
         try {
             // Check if this peer and all connected peers are done
             if (this.peerProcess.allFinished()) {
-                //stop task?
+                this.peerProcess.stopThreads();
+                this.stopTask();;
             }
         } catch (Exception e) {
             System.out.println(e.toString());
