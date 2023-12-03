@@ -123,6 +123,7 @@ public class PeerProcess {
         public HashMap<String, PeerManager> getConnectedNeighbors() { return this.connectedNeighbors; }
         public HashSet<String> getUnchokedNeighbors() { return this.unchokedNeighbors; }
 	    public String getOptimisticUnchokeNeighbor() { return this.optimisticUnchokeNeighbor; }
+        public int getOptmisticUnchokeInterval() { return this.configs.getCommonConfig().getOptimisticUnchokingInterval(); }
 
         public boolean allFinished() {
                 for (Map.Entry<String, BitSet> entry : neighborsPieces.entrySet()) {
@@ -132,9 +133,11 @@ public class PeerProcess {
                 return true;
         }
 
-        public void stopThreads() {
+        public synchronized void stopThreads() {
                 this.connectedThreads.forEach((key, value) -> {
-                        value.interrupt();
+                        if (value != null) {
+                                value.interrupt();
+                        }
                 });
         }
 
