@@ -51,21 +51,14 @@ public class ActualMessage {
 
     public void readActualMessage(int len, byte[] message) {
         this.messageLength = len;
-        this.messageType = MessageType.values()[extractMessageType(message)];
-        this.messagePayload = extractPayload(message, TYPE_SIZE);
+        this.messageType = MessageType.values()[message[LENGTH_SIZE]]; // Correctly get MessageType
+        // Adjust starting index for payload extraction
+        this.messagePayload = Arrays.copyOfRange(message, TYPE_SIZE, TYPE_SIZE + this.messageLength - LENGTH_SIZE - TYPE_SIZE)
     }
 
     public int extractIntFromByteArray(byte[] message, int start) {
         byte[] len = Arrays.copyOfRange(message, start, start + LENGTH_SIZE);
         return ByteBuffer.wrap(len).getInt();
-    }
-
-    public int extractMessageType(byte[] message) {
-        return message[LENGTH_SIZE];
-    }
-
-    public byte[] extractPayload(byte[] message, int start) {
-        return Arrays.copyOfRange(message, start, start + this.messageLength - LENGTH_SIZE - TYPE_SIZE);
     }
 
     public BitSet getBitFieldMessage() {
@@ -77,10 +70,12 @@ public class ActualMessage {
     }
 
     public byte[] getPieceFromPayload() {
-        return Arrays.copyOfRange(this.messagePayload, LENGTH_SIZE, this.messagePayload.length);
+        // Adjust the size calculation to consider the new messageLength calculation
+        int headerSize = LENGTH_SIZE + TYPE_SIZE; // Total size of the length and type headers
+        int size = this.messageLength - headerSize;
+        byte[] piece = new byte[size];
+        System.arraycopy(this.messagePayload, 0, piece, 0, size);
+        return piece;
     }
 
-    public MessageType getMessageType() {
-        return this.messageType;
-    }
 }
