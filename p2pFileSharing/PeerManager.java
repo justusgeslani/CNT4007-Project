@@ -355,6 +355,18 @@ public class PeerManager implements Runnable {
         }
     }
 
+    public void sendMsg(ActualMessage.MessageType type) {
+        try {
+            ActualMessage am = new ActualMessage(type);
+
+            this.out.write(am.buildActualMessage());
+            this.out.flush();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public void resetDownloadRate() {
         this.downloadRate = 0;
     }

@@ -40,7 +40,12 @@ public class UnchokeManager implements Runnable {
                     Iterator<Map.Entry<String, Integer>> iter = sortedDownloadRates.entrySet().iterator();
                     while (iter.hasNext() && counter < maxNeighbors) {
                         Map.Entry<String, Integer> entry = iter.next();
+                        String peerID = entry.getKey();
 
+                        if (interestedNeighbors.contains(peerID)) {
+                            // Get the PeerManager associated with the interested peerID
+                            PeerManager pm = this.process.getConnectedNeighbors().get(peerID);
+                        }
                     }
 
 
@@ -61,10 +66,7 @@ public class UnchokeManager implements Runnable {
                             if (this.process.getOptimisticUnchokeNeighbor() == null || !this.process.getOptimisticUnchokeNeighbor().equals(randomPeerID)) {
                                 // Send an unchoke message
                                 try {
-                                    ActualMessage am = new ActualMessage(ActualMessage.MessageType.UNCHOKE);
-                                    // TODO FIXME
-                                    out.write(am.buildActualMessage());
-                                    out.flush();
+                                    randomPeerManager.sendMsg(ActualMessage.MessageType.UNCHOKE);
                                 }
                                 catch (Exception e) {
                                     e.printStackTrace();
