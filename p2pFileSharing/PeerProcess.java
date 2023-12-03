@@ -132,6 +132,12 @@ public class PeerProcess {
                 return true;
         }
 
+        public void stopThreads() {
+                this.connectedThreads.forEach((key, value) -> {
+                        value.interrupt();
+                });
+        }
+
         public void addConnectedNeighbor(String connectedPeerID, PeerManager pm) {
                 this.connectedNeighbors.put(connectedPeerID, pm);
         }
