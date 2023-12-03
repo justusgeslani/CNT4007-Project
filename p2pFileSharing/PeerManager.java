@@ -4,6 +4,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.BitSet;
+import java.io.ByteArrayOutputStream;
 
 public class PeerManager implements Runnable {
     private Socket socketListener;
@@ -169,6 +170,40 @@ public class PeerManager implements Runnable {
                 }
                 break;
             case REQUEST:
+                if ((this.process.getOptimisticUnchokeNeighbor() != null && this.process.getOptimisticUnchokeNeighbor().equals(this.correspondentPeerID))
+                        || this.process.getUnchokedNeighbors().contains(this.correspondentPeerID) ) {
+
+                    pieceIndex = acmsg.getPieceIndexFromPayload();
+                    try {
+                        int myPosition = this.process.getCommonConfig().getPieceSize() * pieceIndex;
+                        int size = this.process.getCommonConfig().getPieceSize();
+                        if (pieceIndex == this.process.getPieceCount() - 1) {
+                            size = this.process.getCommonConfig().getFileSize() % size;
+                        }
+                        this.process.getFile().seek(myPosition);
+                        byte[] data = new byte[size];
+                        this.process.getFile().read(data);
+
+                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                        byte[] requestPayload = ByteBuffer.allocate(4).putInt(pieceIndex).array();
+                        stream.write(requestPayload);
+                        stream.write(data);
+
+                        try {
+                            ActualMessage am = new ActualMessage(ActualMessage.MessageType.REQUEST, stream.toByteArray());
+                            out.write(am.buildActualMessage());
+                            out.flush();
+                        }
+                        catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                    catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    
+                }
                 break;
             case PIECE:
                 pieceIndex = acmsg.getPieceIndexFromPayload();
