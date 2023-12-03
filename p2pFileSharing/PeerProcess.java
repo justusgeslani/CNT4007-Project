@@ -1,6 +1,7 @@
 // To compile: Use javac peerProcess.java
 import java.io.*;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.SocketException;
 import java.rmi.Remote;
 import java.util.*;
@@ -100,6 +101,34 @@ public class PeerProcess {
                 }
                 catch (IOException e) {
                         e.printStackTrace();
+                }
+        }
+
+        public void connectToNeighbors() {
+                try {
+                        Thread.sleep(5000);
+                        for (String pid : this.availableNeighbors) {
+                                if (pid.equals(this.peerID)) break;
+                                else {
+                                        PeerInfo peer = this.peerInfoMap.get(pid);
+                                        Socket peerSocket = new Socket(peer.getPeerAddress(), peer.getPeerPort());
+
+                                        try {
+                                                PeerManager handler = new PeerManager(peerSocket, pid, this);
+                                                handler.setCorrespondentPeerID(pid);
+                                                this.getConnectedNeighbors().put(pid, handler);
+
+                                                // Start new thread for a neighbor
+                                                Thread peerThread = new Thread(handler);
+                                                this.addConnectedThread(pid, peerThread);
+                                        } catch (Exception e) {
+                                                System.out.println("Error connecting to neighbors " + e.toString());
+                                                peerSocket.close();
+                                        }
+                                }
+                        }
+                } catch (Exception e) {
+                        System.out.println((e.toString()));
                 }
         }
 
