@@ -149,6 +149,7 @@ public class PeerProcess {
                 try {
                         Thread.sleep(5000);
                         for (String pid : this.availableNeighbors) {
+
                                 if (pid.equals(this.peerID)) break;
                                 else {
                                         PeerInfo peer = this.peerInfoMap.get(pid);
@@ -162,6 +163,7 @@ public class PeerProcess {
                                                 // Start new thread for a neighbor
                                                 Thread peerThread = new Thread(handler);
                                                 this.addConnectedThread(pid, peerThread);
+                                                peerThread.start();
                                         } catch (Exception e) {
                                                 System.out.println("Error connecting to neighbors " + e.toString());
                                                 peerSocket.close(); // Prevent resource leaks
