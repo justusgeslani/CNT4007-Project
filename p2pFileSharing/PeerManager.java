@@ -171,6 +171,9 @@ public class PeerManager implements Runnable {
                 this.process.getPeerLogger().receiveInterestLog(this.correspondentPeerID);
                 break;
             case NOT_INTERESTED:
+                this.process.getNeighborsPieces().remove(this.correspondentPeerID);
+                // log that this peer received a not interested message
+                this.process.getPeerLogger().receiveNotInterestLog(this.correspondentPeerID);
                 break;
             case HAVE:
                 break;
