@@ -23,20 +23,35 @@ public class OptimisticUnchokeManager implements Runnable{
     private ScheduledFuture<?> task = null;
 
 
-    // Default ctor
+    /**
+     * Default ctor
+     * @param pProcess The current peer process instance managing the peers and their state.
+     */
     OptimisticUnchokeManager(PeerProcess pProcess) {
         this.peerProcess = pProcess;
         this.optInterval = pProcess.getOptmisticUnchokeInterval; //TODO: implement getter
      }
+
+    /**
+     * Start the scheduled task of optimistically unchoking peers.
+     * Method schedules the run method to be called at fixed (arbitrary) intervals.
+     */
     public void startTask() {
         // TODO: idk what the initial delay should be
         this.task = this.scheduler.scheduleAtFixedRate(this, 10, this.optInterval, TimeUnit.SECONDS);
     }
 
+    /**
+     * Stops the unchoking method.
+     */
     public void stopTask() {
         this.scheduler.shutdownNow();
     }
 
+    /**
+     * Run method is periodically invoked by the scheduler/
+     * Selects a new optimistically unchoked peer and updates the choking status of peers accordingly.
+     */
     @Override
     public void run() {
         try {
@@ -49,33 +64,32 @@ public class OptimisticUnchokeManager implements Runnable{
 
             String nextOptimisticUnchoked = selectRandomNeighbor(interestedNeighbors);
 
-            // If the length of the interested neighbors is none or no optimistic neighbor can be found
-            if (nextOptimisticUnchoked == null) {
-                String currentOptimisticUnchoked = this.peerProcess.getOptimisticUnchokeNeighbor();
+            if (nextOptimisticUnchoked != null) {
+                this.peerProcess.setOptimisticUnchokeNeighbor(nextOptimisticUnchoked);
+                this.peerProcess.getConnectedNeighbors().get(nextOptimisticUnchoked).sendMsg(ActualMessage.MessageType.CHOKE);
+                this.peerProcess.getPeerLogger().changeOptimisticUnchokedNeighborLog(nextOptimisticUnchoked);
+            } else {
                 this.peerProcess.setOptimisticUnchokeNeighbor(null);
-
-                if (currentOptimisticUnchoked != null && !this.peerProcess.getUnchokedNeighbors().contains(currentOptimisticUnchoked)) {
-                    PeerManager pm = this.peerProcess.getConnectedNeighbors().get(currentOptimisticUnchoked);
-                    pm.sendMsg(ActualMessage.MessageType.CHOKE);
-                }
-
-                if (this.peerProcess.allFinished()) {
-                    // TODO HAVE IMPLEMENTATION TO KILL CHOKES
-                }
-
-
             }
 
-            //this.peerProcess.setOptimisticUnhokedNeighbor(nextOptimisticUnchoked); // TODO: implement setter
+            if (currentOptimisticUnchoked != null && this.peerProcess.getUnchokedNeighbors().contains(currentOptimisticUnchoked)) {
+                this.peerProcess.getConnectedNeighbors().get(currentOptimisticUnchoked).sendMsg(ActualMessage.MessageType.CHOKE);
+            }
 
-            // TODO: send unchoked messages
-
+            if (interestedNeighbors.isEmpty() && this.peerProcess.allFinished()) {
+                this.peerProcess.cancelChoke(); //TODO implement kill chokes
+            }
 
         } catch (Exception e) {
             System.out.println(e.toString());
         }
     }
 
+    /**
+     * Selects a random peer from a set of peer
+     * @param neighbors the set of peers to choose from
+     * @return returns a randomly selected peer, or null if the set is empty.
+     */
     private String selectRandomNeighbor(Set<String> neighbors) {
         int len = neighbors.size();
         if (len == 0)
@@ -89,15 +103,4 @@ public class OptimisticUnchokeManager implements Runnable{
         }
         return null;
     }
-
-    private void sendUnchokeMessages(String curr, String next) {
-        if (next != null) {
-            this.peerProcess.getConnectedNeighbors().get(next).sendMsg(ActualMessage.MessageType.UNCHOKE);
-            this.peerProcess.getPeerLogger().changeOptimisticUnchokedNeighborLog(next);
-        }
-        if (curr != null && this.peerProcess.getUnchokedNeighbors().contains(curr)) {
-            this.peerProcess.getConnectedNeighbors().get(curr).sendMsg(ActualMessage.MessageType.CHOKE);
-        }
-    }
-
 }
