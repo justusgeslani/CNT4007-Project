@@ -235,9 +235,5 @@ public class PeerProcess {
         public boolean stopEverything() {
                 return this.everythingDone;
         }
-
-        public static void main(String[] args) {
-                //might need to make another driver function
-        }
 }
 
