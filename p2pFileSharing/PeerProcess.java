@@ -95,20 +95,24 @@ public class PeerProcess {
                         String fileName = this.configs.getCommonConfig().getFileName();
                         File temp = new File(directoryPath + "/" + fileName);
 
-                        // Create a new file for the peer if it doesn't have the file
-//                        if (!this.peerInfo.containsFile()) {
-//                                temp.createNewFile();
-//                        }
+                        try {
+                                // Assign a random access file for the peer
+                                this.file = new RandomAccessFile(temp, "rw");
 
-                        // Assign a random access file for the peer
-                        this.file = new RandomAccessFile(temp, "rw");
+                                // Set the length of the file with the file size given by the configs
+                                if (!this.peerInfo.containsFile()) {
+                                        this.file.setLength(this.configs.getCommonConfig().getFileSize());
+                                }
+                        } catch (FileNotFoundException e) {
+                                System.err.println("File not found: " + e.getMessage());
 
-                        // Set the length of the file with the file size given by the configs
-                        if (!this.peerInfo.containsFile()) {
-                                this.file.setLength(this.configs.getCommonConfig().getFileSize());
+                        } catch (IOException e) {
+                                System.err.println("Error accessing the file: " + e.getMessage());
                         }
                 } else {
                         System.out.println("Couldn't create " + directoryPath + " directory!");
+                        // Handle the case when directory creation fails
+                        // This might involve logging the error, alerting the user, or taking corrective action
                 }
 
                 // For each peer, initialize each of their bitsets
