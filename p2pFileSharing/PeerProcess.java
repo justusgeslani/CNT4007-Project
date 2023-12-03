@@ -65,27 +65,50 @@ public class PeerProcess {
                 this.optUnchokeManager.startTask();
         }
 
+        private static void deleteDirectory(File dir) {
+                File[] allContents = dir.listFiles();
+                if (allContents != null) {
+                        for (File file : allContents) {
+                                deleteDirectory(file);
+                        }
+                }
+                dir.delete();
+        }
+
         private void initialize() throws IOException {
                 // Initialization logic here
                 this.peerInfo = this.peerInfoMap.get(this.peerID);
                 this.availableNeighbors = this.peerInfoManager.getPeerList();
 
                 // Create directory for the peer
-                if ((new File("peer_" + this.peerID)).mkdir()) {
-                        String fileName = this.configs.getCommonConfig().getFileName();
-                        File temp = new File("peer_" + this.peerID + "/" + fileName);
-                        // if this peer doesn't have the file
-                        if (!this.peerInfo.containsFile())
-                                // create a new file for the peer
-                                temp.createNewFile();
-                        // assign a random access file for the peer as one of its attribute variables
-                        this.file = new RandomAccessFile(temp, "rw");
-                        if (!this.peerInfo.containsFile())
-                                // set the length of the file with the file size given by the configs
-                                this.file.setLength(this.configs.getCommonConfig().getFileSize());
+                // Directory path
+                String directoryPath = "peer_" + this.peerID;
+                File directory = new File(directoryPath);
+
+                // Delete the directory if it exists
+                if (directory.exists()) {
+                        deleteDirectory(directory);
                 }
-                else {
-                        System.out.println("Couldn't create " + "peer_" + this.peerID + " file!");
+
+                // Create the directory
+                if (directory.mkdir()) {
+                        String fileName = this.configs.getCommonConfig().getFileName();
+                        File temp = new File(directoryPath + "/" + fileName);
+
+                        // Create a new file for the peer if it doesn't have the file
+                        if (!this.peerInfo.containsFile()) {
+                                temp.createNewFile();
+                        }
+
+                        // Assign a random access file for the peer
+                        this.file = new RandomAccessFile(temp, "rw");
+
+                        // Set the length of the file with the file size given by the configs
+                        if (!this.peerInfo.containsFile()) {
+                                this.file.setLength(this.configs.getCommonConfig().getFileSize());
+                        }
+                } else {
+                        System.out.println("Couldn't create " + directoryPath + " directory!");
                 }
 
                 // For each peer, initialize each of their bitsets
