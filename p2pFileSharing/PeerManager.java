@@ -162,8 +162,13 @@ public class PeerManager implements Runnable {
                         throw new RuntimeException(e);
                     }
                 }
+                // log the unchoking
+                this.process.getPeerLogger().unchokingLog(this.correspondentPeerID);
                 break;
             case INTERESTED:
+                this.process.getInterestedNeighbors().add(this.correspondentPeerID);
+                // log that this peer received an interest message
+                this.process.getPeerLogger().receiveInterestLog(this.correspondentPeerID);
                 break;
             case NOT_INTERESTED:
                 break;

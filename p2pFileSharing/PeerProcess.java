@@ -20,6 +20,7 @@ public class PeerProcess {
         private volatile HashMap<String, PeerManager> connectedNeighbors = new HashMap<>();
         private volatile HashMap<String, Thread> connectedThreads = new HashMap<>();
         private volatile HashMap<String, BitSet> neighborsPieces = new HashMap<>();
+        private volatile HashSet<String> interestedNeighbors = new HashSet<>();
 
         // Threaded Variables
         private volatile String[] requestedInfo;
@@ -81,6 +82,7 @@ public class PeerProcess {
         public PeerProcessLog getPeerLogger() { return this.peerLogger; }
         public String[] getRequestedInfo() { return this.requestedInfo; }
         public HashMap<String, BitSet> getNeighborsPieces() { return this.neighborsPieces; }
+        public HashSet<String> getInterestedNeighbors() { return this.interestedNeighbors; }
         public int getPieceCount() { return this.pieceCount; }
 
         public void addConnectedNeighbor(String connectedPeerID, PeerManager pm) {
