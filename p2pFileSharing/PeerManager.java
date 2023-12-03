@@ -321,5 +321,3 @@ public class PeerManager implements Runnable {
     }
 
 }
-
-
