@@ -23,20 +23,35 @@ public class OptimisticUnchokeManager implements Runnable{
     private ScheduledFuture<?> task = null;
 
 
-    // Default ctor
+    /**
+     * Default ctor
+     * @param pProcess The current peer process instance managing the peers and their state.
+     */
     OptimisticUnchokeManager(PeerProcess pProcess) {
         this.peerProcess = pProcess;
         this.optInterval = pProcess.getOptmisticUnchokeInterval; //TODO: implement getter
      }
+
+    /**
+     * Start the scheduled task of optimistically unchoking peers.
+     * Method schedules the run method to be called at fixed (arbitrary) intervals.
+     */
     public void startTask() {
         // TODO: idk what the initial delay should be
         this.task = this.scheduler.scheduleAtFixedRate(this, 10, this.optInterval, TimeUnit.SECONDS);
     }
 
+    /**
+     * Stops the unchoking method.
+     */
     public void stopTask() {
         this.scheduler.shutdownNow();
     }
 
+    /**
+     * Run method is periodically invoked by the scheduler/
+     * Selects a new optimistically unchoked peer and updates the choking status of peers accordingly.
+     */
     @Override
     public void run() {
         try {
@@ -70,6 +85,11 @@ public class OptimisticUnchokeManager implements Runnable{
         }
     }
 
+    /**
+     * Selects a random peer from a set of peer
+     * @param neighbors the set of peers to choose from
+     * @return returns a randomly selected peer, or null if the set is empty.
+     */
     private String selectRandomNeighbor(Set<String> neighbors) {
         int len = neighbors.size();
         if (len == 0)
