@@ -103,6 +103,14 @@ public class PeerProcess {
                 }
         }
 
+        public void stopServer() {
+                // logic to stop server socket and other network related stuff
+        }
+
+        public void closeResources() {
+                // logic to close resources: file handlers, etc.
+        }
+
         public String getPeerID() { return this.peerID; }
         public PeerProcessLog getPeerLogger() { return this.peerLogger; }
         public String[] getRequestedInfo() { return this.requestedInfo; }
