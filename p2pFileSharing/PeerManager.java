@@ -241,7 +241,8 @@ public class PeerManager implements Runnable {
                 }
                 else {
                     this.process.getPeerLogger().downloadCompleteLog();
-                    // TODO implement all done check, then cancel choke check
+                    if(process.allFinished())
+                        this.process.stopChokes();
 
                     // Send a not interested message
                     try {
