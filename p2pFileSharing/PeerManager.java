@@ -316,8 +316,6 @@ public class PeerManager implements Runnable {
         BitSet correspondentPieces = this.process.getNeighborsPieces().get(this.correspondentPeerID);
         BitSet myPieces = this.process.getNeighborsPieces().get(this.peerID);
 
-        // See if we desire a piece from the corresponding peer
-        // If we do, set the index of the requestedInfo array to the peer ID of the corresponding peer
         int desiredPiece = -1;
         for (int i = 0; i < this.process.getPieceCount() && i < correspondentPieces.size(); i++) {
             if (correspondentPieces.get(i) && !myPieces.get(i) && this.process.getRequestedInfo()[i] == null) {
@@ -327,35 +325,46 @@ public class PeerManager implements Runnable {
             }
         }
 
-        // If we have no desired piece, send a message that we're not interested
         if (desiredPiece < 0) {
             try {
                 ActualMessage am = new ActualMessage(ActualMessage.MessageType.NOT_INTERESTED);
                 out.write(am.buildActualMessage());
                 out.flush();
-            }
-            catch (Exception e) {
+                System.out.println("Sent NOT_INTERESTED message to peer: " + correspondentPeerID);
+            } catch (IOException e) {
+                System.err.println("IOException occurred while sending NOT_INTERESTED message to peer: " + correspondentPeerID);
+                e.printStackTrace();
+            } catch (Exception e) {
+                System.err.println("Unexpected exception occurred while sending NOT_INTERESTED message to peer: " + correspondentPeerID);
                 e.printStackTrace();
             }
-        }
-        // Else, send a message that as a request for the desired piece
-        else {
+        } else {
             try {
                 byte[] requestPayload = ByteBuffer.allocate(4).putInt(desiredPiece).array();
                 ActualMessage am = new ActualMessage(ActualMessage.MessageType.REQUEST, requestPayload);
                 out.write(am.buildActualMessage());
                 out.flush();
-            }
-            catch (IOException e) {
-                throw new RuntimeException(e);
+                System.out.println("Sent REQUEST message for piece " + desiredPiece + " to peer: " + correspondentPeerID);
+            } catch (IOException e) {
+                System.err.println("IOException occurred while sending REQUEST message for piece " + desiredPiece + " to peer: " + correspondentPeerID);
+                e.printStackTrace();
+            } catch (Exception e) {
+                System.err.println("Unexpected exception occurred while sending REQUEST message for piece " + desiredPiece + " to peer: " + correspondentPeerID);
+                e.printStackTrace();
             }
         }
     }
 
 
-    private void broadcastHaveMsgs (int pieceIndex) {
+    private void broadcastHaveMsgs(int pieceIndex) {
         this.process.getConnectedNeighbors().forEach((key, value) -> {
-            value.sendHaveMsgs(pieceIndex);
+            try {
+                value.sendHaveMsgs(pieceIndex);
+                System.out.println("Broadcasted HAVE message for piece index: " + pieceIndex + " to peer: " + key);
+            } catch (Exception e) {
+                System.err.println("Error broadcasting HAVE message for piece index: " + pieceIndex + " to peer: " + key);
+                e.printStackTrace();
+            }
         });
     }
 
@@ -365,11 +374,16 @@ public class PeerManager implements Runnable {
             ActualMessage am = new ActualMessage(ActualMessage.MessageType.HAVE, requestPayload);
             out.write(am.buildActualMessage());
             out.flush();
-        }
-        catch (Exception e) {
+            System.out.println("Sent HAVE message for piece index: " + pieceIndex);
+        } catch (IOException e) {
+            System.err.println("IOException occurred while sending HAVE message for piece index: " + pieceIndex);
+            e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("Unexpected exception occurred while sending HAVE message for piece index: " + pieceIndex);
             e.printStackTrace();
         }
     }
+
 
     public void sendMsg(ActualMessage.MessageType type) {
         try {
@@ -377,19 +391,46 @@ public class PeerManager implements Runnable {
 
             this.out.write(am.buildActualMessage());
             this.out.flush();
-        }
-        catch (Exception e) {
+        } catch (IOException e) {
+            System.err.println("IOException occurred while sending a message of type " + type);
+            System.err.println("Error message: " + e.getMessage());
+            e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("Unexpected exception occurred while sending a message of type " + type);
+            System.err.println("Error message: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    public void setCorrespondentPeerID(String x) { this.correspondentPeerID = x;}
+
+    public void setCorrespondentPeerID(String x) {
+        try {
+            this.correspondentPeerID = x;
+            System.out.println("Correspondent peer ID set to: " + x);
+        } catch (Exception e) {
+            System.err.println("Error setting correspondent peer ID to: " + x);
+            e.printStackTrace();
+        }
+    }
+
     public void resetDownloadRate() {
-        this.downloadRate = 0;
+        try {
+            this.downloadRate = 0;
+            System.out.println("Download rate reset to 0.");
+        } catch (Exception e) {
+            System.err.println("Error resetting download rate.");
+            e.printStackTrace();
+        }
     }
 
     public int getDownloadRate() {
-        return this.downloadRate;
+        try {
+            System.out.println("Current download rate: " + this.downloadRate);
+            return this.downloadRate;
+        } catch (Exception e) {
+            System.err.println("Error retrieving download rate.");
+            e.printStackTrace();
+            return -1; // Return a default or error value
+        }
     }
-
 }
