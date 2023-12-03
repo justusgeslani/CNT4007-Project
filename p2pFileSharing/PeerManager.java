@@ -355,4 +355,12 @@ public class PeerManager implements Runnable {
         }
     }
 
+    public void resetDownloadRate() {
+        this.downloadRate = 0;
+    }
+
+    public int getDownloadRate() {
+        return this.downloadRate;
+    }
+
 }
