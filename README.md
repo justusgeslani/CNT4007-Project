@@ -3,6 +3,9 @@
 ## Project Group 34
 Team Members: Kevin Zhang (kevin.zhang@ufl.edu), John Midel Miclat (jmiclat@ufl.edu), Justus Geslani (justus.geslani@ufl.edu)
 
+## Overview
+This is our attempt at a peer-to-peer file sharing program similar to BitTorrent. In this project, each peer will act as both a client and server, with no central system for file distribution. We implement many features of BitTorrent, including choking/unchoking, handshakes, TCP connections, and so on. In our video demo, we try our best to demonstrate these functions <3
+
 
 ### Starting the Peer Process
 Our program is able to correctly read in Common.cfg and PeerInfo.cfg, storing the related variables to their respective positions.
