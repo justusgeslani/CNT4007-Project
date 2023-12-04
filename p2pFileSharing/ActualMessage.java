@@ -21,7 +21,15 @@ public class ActualMessage {
     private byte[] messagePayload;
 
     public enum MessageType {
-        CHOKE, UNCHOKE, INTERESTED, NOT_INTERESTED, HAVE, BITFIELD, REQUEST, PIECE
+        CHOKE, UNCHOKE, INTERESTED, NOT_INTERESTED, HAVE, BITFIELD, REQUEST, PIECE;
+
+        public static MessageType fromByte(byte b) {
+            return MessageType.values()[b];
+        }
+
+        public byte toByte() {
+            return (byte) this.ordinal();
+        }
     }
 
     public ActualMessage(MessageType messageType) {
@@ -41,7 +49,7 @@ public class ActualMessage {
         try {
             byte[] bytes = ByteBuffer.allocate(LENGTH_SIZE).putInt(this.messageLength).array();
             stream.write(bytes);
-            stream.write(this.messageType.ordinal());
+            stream.write(this.messageType.toByte());
             stream.write(this.messagePayload);
         } catch (Exception e) {
             System.err.println("Error while processing message payload: " + e.getMessage());
@@ -50,47 +58,72 @@ public class ActualMessage {
     }
 
     public void readActualMessage(int len, byte[] message) {
-        this.messageLength = len;
-        //this.messageType = MessageType.values()[message[LENGTH_SIZE]]; // Correctly get MessageType
-        //this.messageType = (char) message[0];
-        this.messageType = switch ((char) message[0]) {
-            case '0' -> ActualMessage.MessageType.CHOKE;
-            case '1' -> ActualMessage.MessageType.UNCHOKE;
-            case '2' -> ActualMessage.MessageType.INTERESTED;
-            case '3' -> ActualMessage.MessageType.NOT_INTERESTED;
-            case '4' -> ActualMessage.MessageType.HAVE;
-            case '5' -> ActualMessage.MessageType.BITFIELD;
-            case '6' -> ActualMessage.MessageType.REQUEST;
-            case '7' -> ActualMessage.MessageType.PIECE;
-            default -> null;
-        };
-        byte[] temp = new byte[this.messageLength - 1];
-        System.arraycopy(message, 1, temp, 0, this.messageLength - 1);
-        this.messagePayload = temp;
-        // Adjust starting index for payload extraction
-        //this.messagePayload = Arrays.copyOfRange(message, TYPE_SIZE, TYPE_SIZE + this.messageLength - LENGTH_SIZE - TYPE_SIZE);
+        try {
+            if (message == null || message.length < TYPE_SIZE) {
+                throw new IllegalArgumentException("Invalid message array.");
+            }
+            this.messageLength = len;
+            this.messageType = MessageType.fromByte(message[0]);
+            if (this.messageLength < TYPE_SIZE) {
+                throw new IllegalArgumentException("Message length is too short.");
+            }
+            this.messagePayload = new byte[this.messageLength - TYPE_SIZE];
+            System.arraycopy(message, TYPE_SIZE, this.messagePayload, 0, this.messageLength - TYPE_SIZE);
+        } catch (Exception e) {
+            System.out.println("Error reading actual message");
+            e.printStackTrace();
+        }
     }
 
     public int extractIntFromByteArray(byte[] message, int start) {
-        byte[] len = Arrays.copyOfRange(message, start, start + LENGTH_SIZE);
-        return ByteBuffer.wrap(len).getInt();
+        try {
+            if (message == null || message.length < start + LENGTH_SIZE) {
+                throw new IllegalArgumentException("Invalid message array or start index.");
+            }
+            byte[] len = Arrays.copyOfRange(message, start, start + LENGTH_SIZE);
+            return ByteBuffer.wrap(len).getInt();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
     }
 
     public BitSet getBitFieldMessage() {
-        return BitSet.valueOf(this.messagePayload);
+        try {
+            if (this.messagePayload == null) {
+                throw new IllegalStateException("Payload is not set.");
+            }
+            return BitSet.valueOf(this.messagePayload);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public int getPieceIndexFromPayload() {
-        return extractIntFromByteArray(this.messagePayload, 0);
+        try {
+            return extractIntFromByteArray(this.messagePayload, 0);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
     }
 
     public byte[] getPieceFromPayload() {
-        // Adjust the size calculation to consider the new messageLength calculation
-        int headerSize = LENGTH_SIZE + TYPE_SIZE; // Total size of the length and type headers
-        int size = this.messageLength - headerSize;
-        byte[] piece = new byte[size];
-        System.arraycopy(this.messagePayload, 0, piece, 0, size);
-        return piece;
+        try {
+            // Adjust the size calculation to consider the new messageLength calculation
+            int headerSize = LENGTH_SIZE + TYPE_SIZE; // Total size of the length and type headers
+            int size = this.messageLength - headerSize;
+            if (size < 0 || size > this.messagePayload.length) {
+                throw new IllegalArgumentException("Invalid size calculation.");
+            }
+            byte[] piece = new byte[size];
+            System.arraycopy(this.messagePayload, 0, piece, 0, size);
+            return piece;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null; // Or handle the error as appropriate for your application
+        }
     }
 
 }
