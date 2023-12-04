@@ -192,6 +192,7 @@ public class PeerManager implements Runnable {
                 this.process.getPeerLogger().receiveHaveLog(pieceIndex, this.correspondentPeerID);
                 break;
             case BITFIELD:
+                System.out.println("asdjksdgsdk");
                 BitSet bitfield = acmsg.getBitFieldMessage();
                 // replace the bitfield of the correspondent in the neighborsPieces map
                 this.process.getNeighborsPieces().remove(this.correspondentPeerID);
@@ -299,6 +300,9 @@ public class PeerManager implements Runnable {
             BitSet correspondentPieces = this.process.getNeighborsPieces().get(this.correspondentPeerID);
             BitSet myPieces = this.process.getNeighborsPieces().get(this.peerID);
 
+            System.out.println("Correspondent Pieces: " + correspondentPieces);
+            System.out.println("My Pieces: " + myPieces);
+
             boolean desirePiece = false;
             for (int i = 0; i < this.process.getPieceCount() && i < correspondentPieces.size(); i++) {
                 if (correspondentPieces.get(i) && !myPieces.get(i)) {
@@ -332,6 +336,10 @@ public class PeerManager implements Runnable {
     private void checkRequestsAndSendMsg() {
         BitSet correspondentPieces = this.process.getNeighborsPieces().get(this.correspondentPeerID);
         BitSet myPieces = this.process.getNeighborsPieces().get(this.peerID);
+
+        System.out.println("Correspondent Pieces: " + correspondentPieces);
+        System.out.println("My Pieces: " + myPieces);
+        System.out.println("Requested Info: " + Arrays.toString(this.process.getRequestedInfo()));
 
         int desiredPiece = -1;
         for (int i = 0; i < this.process.getPieceCount() && i < correspondentPieces.size(); i++) {
