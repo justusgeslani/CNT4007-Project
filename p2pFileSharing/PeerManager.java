@@ -66,22 +66,17 @@ public class PeerManager implements Runnable {
                     }
                 }
                 else {
-                    // Create a 4-byte array to encapsulate the message length header from the actual message
-                    byte[] msgLength = new byte[4];
-                    in.readFully(msgLength);
-                    // Create a len variable to store the message length gathered from the header
-                    int len = 0;
-                    // Convert the byte array to an int
-                    for (byte b : msgLength) { len = (len << 8) + (b & 0xFF); }
-                    // Read the actual message, as we now know the message length
-                    byte[] actualMsg = new byte[len];
+                    while (this.in.available() < 4) {
+                    }
+                    int msgLength = this.in.readInt();
+                    byte[] actualMsg = new byte[msgLength];
+                    this.in.readFully(actualMsg);
 
-                    in.readFully(actualMsg);
                     // Gather the message type with the written method
                     ActualMessage.MessageType messageType = getMessageType(actualMsg);
                     // TODO CHECK THE FOLLOWING TWO STATEMENTS, seems there are discrepancies between this and ActualMessage.java
                     ActualMessage acmsg = new ActualMessage(messageType);
-                    acmsg.readActualMessage(len, actualMsg);
+                    acmsg.readActualMessage(msgLength, actualMsg);
 
                     // Method to handle the message based on the type
                     handleMessage(acmsg, messageType);
@@ -118,8 +113,8 @@ public class PeerManager implements Runnable {
             in.readFully(returnhs); // Read in the returned handshake message
 
             // Log the received handshake message
-            this.process.getPeerLogger().log(4, this.peerID + " has received the following handshake message from " + this.correspondentPeerID);
-            this.process.getPeerLogger().log(4, Arrays.toString(returnhs));
+            this.process.getPeerLogger().logMessage(4, this.peerID + " has received the following handshake message from " + this.correspondentPeerID);
+            this.process.getPeerLogger().logMessage(4, Arrays.toString(returnhs));
 
             hsmsg = hsmsg.readHandShakeMessage(returnhs);
             // Get the peer ID of the corresponding peer from the handshake message
