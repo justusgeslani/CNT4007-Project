@@ -192,7 +192,6 @@ public class PeerManager implements Runnable {
                 this.process.getPeerLogger().receiveHaveLog(pieceIndex, this.correspondentPeerID);
                 break;
             case BITFIELD:
-                System.out.println("asdjksdgsdk");
                 BitSet bitfield = acmsg.getBitFieldMessage();
                 // replace the bitfield of the correspondent in the neighborsPieces map
                 this.process.getNeighborsPieces().remove(this.correspondentPeerID);

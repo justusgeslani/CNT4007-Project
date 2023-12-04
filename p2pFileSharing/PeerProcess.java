@@ -91,7 +91,7 @@ public class PeerProcess {
 		System.out.println("---------- PeerInfo.cfg ----------");
 		System.out.println("Peer ID: " + this.peerInfo.getPeerId());
 		System.out.println("Peer Address: " + this.peerInfo.getPeerAddress());
-		System.out.println("Peer ID: " + this.peerInfo.getPeerPort());
+		System.out.println("Peer Port: " + this.peerInfo.getPeerPort());
 		System.out.println("Peer ID: " + this.peerInfo.containsFile());
 
 		// Create directory for the peer
@@ -124,7 +124,6 @@ public class PeerProcess {
 				System.err.println("Error accessing the file: " + e.getMessage());
 			}
 		} else {
-			System.out.println("Couldn't create " + directoryPath + " directory!");
 			// Handle the case when directory creation fails
 			// This might involve logging the error, alerting the user, or taking corrective action
 		}
