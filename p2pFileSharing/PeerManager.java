@@ -3,6 +3,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.io.ByteArrayOutputStream;
 
@@ -95,22 +96,27 @@ public class PeerManager implements Runnable {
             return null;
         }
 
-        char type = (char) actualMsg[0];
+        System.out.println("Received message: " + Arrays.toString(actualMsg));
+        byte type = actualMsg[0];
+        System.out.println("Interpreted message type as byte: " + type);
+
         return switch (type) {
-            case '0' -> ActualMessage.MessageType.CHOKE;
-            case '1' -> ActualMessage.MessageType.UNCHOKE;
-            case '2' -> ActualMessage.MessageType.INTERESTED;
-            case '3' -> ActualMessage.MessageType.NOT_INTERESTED;
-            case '4' -> ActualMessage.MessageType.HAVE;
-            case '5' -> ActualMessage.MessageType.BITFIELD;
-            case '6' -> ActualMessage.MessageType.REQUEST;
-            case '7' -> ActualMessage.MessageType.PIECE;
+            case 0 -> ActualMessage.MessageType.CHOKE;
+            case 1 -> ActualMessage.MessageType.UNCHOKE;
+            case 2 -> ActualMessage.MessageType.INTERESTED;
+            case 3 -> ActualMessage.MessageType.NOT_INTERESTED;
+            case 4 -> ActualMessage.MessageType.HAVE;
+            case 5 -> ActualMessage.MessageType.BITFIELD;
+            case 6 -> ActualMessage.MessageType.REQUEST;
+            case 7 -> ActualMessage.MessageType.PIECE;
             default -> {
                 System.err.println("Invalid message type received: " + type);
                 yield null;
             }
         };
     }
+
+
 
     private void establishConnection() {
         try {
