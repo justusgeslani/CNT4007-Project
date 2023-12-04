@@ -80,6 +80,20 @@ public class PeerProcess {
 		this.peerInfo = this.peerInfoMap.get(this.peerID);
 		this.availableNeighbors = this.peerInfoManager.getPeerList();
 
+		System.out.println("---------- Common.cfg ----------");
+		System.out.println("NumberOfPreferredNeighbors: " + this.configs.getCommonConfig().getNumberOfPreferredNeighbors());
+		System.out.println("UnchokingInterval: " + this.configs.getCommonConfig().getUnchokingInterval());
+		System.out.println("OptimisticUnchokingInterval: " + this.configs.getCommonConfig().getOptimisticUnchokingInterval());
+		System.out.println("FileName: " + this.configs.getCommonConfig().getFileName());
+		System.out.println("FileSize: " + this.configs.getCommonConfig().getFileSize());
+		System.out.println("PieceSize: " + this.configs.getCommonConfig().getPieceSize());
+		System.out.println();
+		System.out.println("---------- PeerInfo.cfg ----------");
+		System.out.println("Peer ID: " + this.peerInfo.getPeerId());
+		System.out.println("Peer Address: " + this.peerInfo.getPeerAddress());
+		System.out.println("Peer ID: " + this.peerInfo.getPeerPort());
+		System.out.println("Peer ID: " + this.peerInfo.containsFile());
+
 		// Create directory for the peer
 		// Directory path
 		String directoryPath = "" + this.peerID;
