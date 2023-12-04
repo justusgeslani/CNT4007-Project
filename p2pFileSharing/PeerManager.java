@@ -3,8 +3,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.io.ByteArrayOutputStream;
+import java.util.logging.Level;
 
 public class PeerManager implements Runnable {
     private Socket socketListener;
@@ -40,6 +42,9 @@ public class PeerManager implements Runnable {
         try {
             // Create the handshake message byte array and send it out
             byte[] msg = hsmsg.buildHandShakeMessage();
+            // Log the sent handshake message
+            this.process.getPeerLogger().logMessage(4, this.peerID + " has sent the following handshake message to " + this.correspondentPeerID);
+            this.process.getPeerLogger().logMessage(4, Arrays.toString(msg));
             out.write(msg);
             out.flush();
 
@@ -51,7 +56,6 @@ public class PeerManager implements Runnable {
                         try {
                             BitSet myPieces = this.process.getNeighborsPieces().get(this.peerID);
                             ActualMessage am = new ActualMessage(ActualMessage.MessageType.BITFIELD, myPieces.toByteArray());
-
                             out.write(am.buildActualMessage());
                             out.flush();
                         }
@@ -71,6 +75,7 @@ public class PeerManager implements Runnable {
                     for (byte b : msgLength) { len = (len << 8) + (b & 0xFF); }
                     // Read the actual message, as we now know the message length
                     byte[] actualMsg = new byte[len];
+
                     in.readFully(actualMsg);
                     // Gather the message type with the written method
                     ActualMessage.MessageType messageType = getMessageType(actualMsg);
@@ -90,16 +95,17 @@ public class PeerManager implements Runnable {
     }
 
     private ActualMessage.MessageType getMessageType(byte[] actualMsg) {
-        char type = (char) actualMsg[0];
+        byte type = actualMsg[0];
+
         ActualMessage.MessageType messageType = switch (type) {
-            case '0' -> ActualMessage.MessageType.CHOKE;
-            case '1' -> ActualMessage.MessageType.UNCHOKE;
-            case '2' -> ActualMessage.MessageType.INTERESTED;
-            case '3' -> ActualMessage.MessageType.NOT_INTERESTED;
-            case '4' -> ActualMessage.MessageType.HAVE;
-            case '5' -> ActualMessage.MessageType.BITFIELD;
-            case '6' -> ActualMessage.MessageType.REQUEST;
-            case '7' -> ActualMessage.MessageType.PIECE;
+            case 0 -> ActualMessage.MessageType.CHOKE;
+            case 1 -> ActualMessage.MessageType.UNCHOKE;
+            case 2 -> ActualMessage.MessageType.INTERESTED;
+            case 3 -> ActualMessage.MessageType.NOT_INTERESTED;
+            case 4 -> ActualMessage.MessageType.HAVE;
+            case 5 -> ActualMessage.MessageType.BITFIELD;
+            case 6 -> ActualMessage.MessageType.REQUEST;
+            case 7 -> ActualMessage.MessageType.PIECE;
             default -> null;
         };
         return messageType;
@@ -110,6 +116,11 @@ public class PeerManager implements Runnable {
             // Create a 32-byte array to encapsulate the returned handshake message
             byte[] returnhs = new byte[32];
             in.readFully(returnhs); // Read in the returned handshake message
+
+            // Log the received handshake message
+            this.process.getPeerLogger().log(4, this.peerID + " has received the following handshake message from " + this.correspondentPeerID);
+            this.process.getPeerLogger().log(4, Arrays.toString(returnhs));
+
             hsmsg = hsmsg.readHandShakeMessage(returnhs);
             // Get the peer ID of the corresponding peer from the handshake message
             this.correspondentPeerID = hsmsg.getPeerID();

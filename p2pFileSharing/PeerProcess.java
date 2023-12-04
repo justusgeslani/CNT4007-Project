@@ -5,6 +5,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.rmi.Remote;
 import java.util.*;
+import java.util.logging.Level;
 
 
 public class PeerProcess {
@@ -55,6 +56,18 @@ public class PeerProcess {
 		}
 		catch (IOException ioException) {
 			ioException.printStackTrace();
+		}
+
+		// Logging for the peer
+		String firstLog = this.peerID + " peer is located at " + this.getPeerInfo().getPeerPort() + " port with the following bitset:";
+		this.peerLogger.logMessage(4, firstLog);
+		String secondLog = String.valueOf(this.neighborsPieces.get(this.peerID));
+		this.peerLogger.logMessage(4, secondLog);
+		if (this.peerInfo.containsFile()) {
+			this.peerLogger.logMessage(4, "This peer also contains the file.");
+		}
+		else {
+			this.peerLogger.logMessage(4, "This peer also does not contain the file.");
 		}
 
 		this.optUnchokeManager = new OptimisticUnchokeManager(this);
