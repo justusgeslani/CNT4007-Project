@@ -65,6 +65,16 @@ public class HandShakeMessage {
         System.arraycopy(messageBytes, HEADER_LENGTH + ZERO_BITS_LENGTH, peerIdBytes, 0, PEER_ID_LENGTH);
         String peerID = new String(peerIdBytes, StandardCharsets.UTF_8);
 
+        System.out.println();
+        System.out.println("---------- Handshake Message ----------");
+        System.out.println("Handshake header: " + header);
+        String zerobits = "";
+        for(int i = HEADER_LENGTH; i < HEADER_LENGTH + ZERO_BITS_LENGTH; i++) {
+            zerobits += messageBytes[i];
+        }
+        System.out.println("Zero bits: " + zerobits);
+        System.out.println("Peer ID: " + peerID);
+
         return new HandShakeMessage(peerID);
     }
 }
