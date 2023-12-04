@@ -1,7 +1,7 @@
 # CNT4007-Project
 
 ## Project Group 34
-Team Members: Kevin Zhang, John Midel Miclat, Justus Geslani
+Team Members: Kevin Zhang, John Midel Miclat (jmiclat@ufl.edu), Justus Geslani
 
 
 ### Starting the Peer Process
@@ -30,6 +30,14 @@ Choking/Unchoking and Optimistic Choking algorithm is also impelemented, but it 
 Ensure that you are in the 'p2pFileSharing' directory.
 Compile the project using `javac PeerDriver.java`
 Run the code using `java PeerDriver ${peer_id)`, and replace the peer ID with the given configuration, e.g. `1001`, etc.
+
+#### Contributions
+Justus Geslani - 
+
+John Miclat - John did work upon several files. He implemented the PeerConfigManager, which manages the configs for both Common.cfg and PeerInfo.cfg. He also implemented the OptimisticUnchokeManager, the PeerDriver, CommonConfig, PeerInfoManager, PeerInfo (which is based off the given RemotePeerInfo), much of PeerProcess (initilziation, ctor, runServer, connectToNeighbors, and other minor contributions), and PeerTerminate. Aside from that, he aided in development of other classes.
+
+Kevin Zhang - 
+
 
 ### Video Link
 https://youtu.be/Xg_AW91Fmlw
