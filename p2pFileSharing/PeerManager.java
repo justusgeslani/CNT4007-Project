@@ -30,14 +30,14 @@ public class PeerManager implements Runnable {
             out = new ObjectOutputStream(socketListener.getOutputStream());
             out.flush();
             in = new ObjectInputStream(socketListener.getInputStream());
-        }
-        catch(IOException ioException) {
+        } catch (IOException ioException) {
             ioException.printStackTrace();
             System.out.println("ERROR CREATING PEERMANAGER");
         }
 
         hsmsg = new HandShakeMessage(pID);
     }
+
     public void run() {
         try {
             // Create the handshake message byte array and send it out
@@ -52,7 +52,8 @@ public class PeerManager implements Runnable {
                 if (!madeConnection) {
                     establishConnection();
 
-                    if (this.process.getPeerInfo().containsFile() || this.process.getNeighborsPieces().get(this.peerID).cardinality() > 0) {
+                    if (this.process.getPeerInfo().containsFile()
+                            || this.process.getNeighborsPieces().get(this.peerID).cardinality() > 0) {
                         try {
                             BitSet myPieces = this.process.getNeighborsPieces().get(this.peerID);
                             ActualMessage am = new ActualMessage(ActualMessage.MessageType.BITFIELD, myPieces.toByteArray());
@@ -61,25 +62,27 @@ public class PeerManager implements Runnable {
                         }
                         catch (Exception e) {
                             System.out.println("ERROR BUILDING BITFIELD MESSAGE");
-
                         }
                     }
-                }
-                else {
-                    // Create a 4-byte array to encapsulate the message length header from the actual message
+                } else {
+                    // Create a 4-byte array to encapsulate the message length header from the
+                    // actual message
                     byte[] msgLength = new byte[4];
                     in.readFully(msgLength);
                     // Create a len variable to store the message length gathered from the header
                     int len = 0;
                     // Convert the byte array to an int
-                    for (byte b : msgLength) { len = (len << 8) + (b & 0xFF); }
+                    for (byte b : msgLength) {
+                        len = (len << 8) + (b & 0xFF);
+                    }
                     // Read the actual message, as we now know the message length
                     byte[] actualMsg = new byte[len];
 
                     in.readFully(actualMsg);
                     // Gather the message type with the written method
                     ActualMessage.MessageType messageType = getMessageType(actualMsg);
-                    // TODO CHECK THE FOLLOWING TWO STATEMENTS, seems there are discrepancies between this and ActualMessage.java
+                    // TODO CHECK THE FOLLOWING TWO STATEMENTS, seems there are discrepancies
+                    // between this and ActualMessage.java
                     ActualMessage acmsg = new ActualMessage(messageType);
                     acmsg.readActualMessage(len, actualMsg);
 
@@ -87,17 +90,24 @@ public class PeerManager implements Runnable {
                     handleMessage(acmsg, messageType);
                 }
             }
-        }
-        catch (IOException ioException){
+        } catch (IOException ioException) {
             ioException.printStackTrace();
             System.out.println("ERROR RUNNING PEER MANAGER");
         }
     }
 
     private ActualMessage.MessageType getMessageType(byte[] actualMsg) {
-        byte type = actualMsg[0];
 
-        ActualMessage.MessageType messageType = switch (type) {
+        if (actualMsg == null || actualMsg.length == 0) {
+            System.err.println("Empty or null message received in getMessageType");
+            return null;
+        }
+
+        System.out.println("Received message: " + Arrays.toString(actualMsg));
+        byte type = actualMsg[0];
+        System.out.println("Interpreted message type as byte: " + type);
+
+        return switch (type) {
             case 0 -> ActualMessage.MessageType.CHOKE;
             case 1 -> ActualMessage.MessageType.UNCHOKE;
             case 2 -> ActualMessage.MessageType.INTERESTED;
@@ -108,8 +118,9 @@ public class PeerManager implements Runnable {
             case 7 -> ActualMessage.MessageType.PIECE;
             default -> null;
         };
-        return messageType;
     }
+
+
 
     private void establishConnection() {
         try {
@@ -124,7 +135,8 @@ public class PeerManager implements Runnable {
             hsmsg = hsmsg.readHandShakeMessage(returnhs);
             // Get the peer ID of the corresponding peer from the handshake message
             this.correspondentPeerID = hsmsg.getPeerID();
-            // Add the connected neighbor into the hash map with the corresponding peer ID and the current peer manager
+            // Add the connected neighbor into the hash map with the corresponding peer ID
+            // and the current peer manager
             this.process.addConnectedNeighbor(this.correspondentPeerID, this);
             // Add the current thread into the hash map with the corresponding peer ID
             this.process.addConnectedThread(this.correspondentPeerID, Thread.currentThread());
@@ -135,14 +147,17 @@ public class PeerManager implements Runnable {
                 this.process.getPeerLogger().peerToPeerTCPLog(this.correspondentPeerID);
             else
                 this.process.getPeerLogger().peerFromPeerTCPLog(this.correspondentPeerID);
-        }
-        catch (IOException ioException) {
+        } catch (IOException ioException) {
             ioException.printStackTrace();
             System.out.println("ERROR ESTABLISHING CONNECTION");
         }
     }
 
     private void handleMessage(ActualMessage acmsg, ActualMessage.MessageType type) {
+        if (type == null) {
+            System.err.println("Null message type in handleMessage");
+            return;
+        }
         switch (type) {
             case CHOKE:
                 // reset the requested info due to the choke message
@@ -176,7 +191,7 @@ public class PeerManager implements Runnable {
                 int pieceIndex = acmsg.getPieceIndexFromPayload();
                 this.process.getNeighborsPieces().get(this.correspondentPeerID).set(pieceIndex);
                 // Cancel chokes if all peers are done
-                if(process.allFinished())
+                if (process.allFinished())
                     this.process.stopChokes();
 
                 // Check if this peer is interested in the corresponding peer's pieces
@@ -187,6 +202,7 @@ public class PeerManager implements Runnable {
                 this.process.getPeerLogger().receiveHaveLog(pieceIndex, this.correspondentPeerID);
                 break;
             case BITFIELD:
+                System.out.println("asdjksdgsdk");
                 BitSet bitfield = acmsg.getBitFieldMessage();
                 // replace the bitfield of the correspondent in the neighborsPieces map
                 this.process.getNeighborsPieces().remove(this.correspondentPeerID);
@@ -200,8 +216,9 @@ public class PeerManager implements Runnable {
                 }
                 break;
             case REQUEST:
-                if ((this.process.getOptimisticUnchokeNeighbor() != null && this.process.getOptimisticUnchokeNeighbor().equals(this.correspondentPeerID))
-                        || this.process.getUnchokedNeighbors().contains(this.correspondentPeerID) ) {
+                if ((this.process.getOptimisticUnchokeNeighbor() != null
+                        && this.process.getOptimisticUnchokeNeighbor().equals(this.correspondentPeerID))
+                        || this.process.getUnchokedNeighbors().contains(this.correspondentPeerID)) {
 
                     pieceIndex = acmsg.getPieceIndexFromPayload();
                     try {
@@ -220,11 +237,11 @@ public class PeerManager implements Runnable {
                         stream.write(data);
 
                         try {
-                            ActualMessage am = new ActualMessage(ActualMessage.MessageType.REQUEST, stream.toByteArray());
+                            ActualMessage am = new ActualMessage(ActualMessage.MessageType.REQUEST,
+                                    stream.toByteArray());
                             out.write(am.buildActualMessage());
                             out.flush();
-                        }
-                        catch (Exception e) {
+                        } catch (Exception e) {
                             e.printStackTrace();
                             System.out.println("ERROR SENDING REQUEST MESSAGE");
                         }
@@ -232,7 +249,6 @@ public class PeerManager implements Runnable {
                     }
                     catch (IOException e) {
                         System.out.println("ERROR RECEIVING REQUEST MESSAGE");
-                        throw new RuntimeException(e);
                     }
 
                 }
@@ -252,7 +268,8 @@ public class PeerManager implements Runnable {
                     e.printStackTrace();
                 }
 
-                // Update the neighborsPieces map, now with this peer having received the additional piece
+                // Update the neighborsPieces map, now with this peer having received the
+                // additional piece
                 this.process.getNeighborsPieces().get(this.peerID).set(pieceIndex);
 
                 // Increase the download rate for this thread/peer
@@ -262,7 +279,8 @@ public class PeerManager implements Runnable {
                 int numFinishedPieces = this.process.getNeighborsPieces().get(this.peerID).cardinality();
                 // Log that this peer has downloaded the piece
                 this.process.getPeerLogger().downloadPieceLog(pieceIndex, numFinishedPieces, this.peerID);
-                // Update the requested info array so that we no longer require the piece in the pieceIndex
+                // Update the requested info array so that we no longer require the piece in the
+                // pieceIndex
                 this.process.getRequestedInfo()[pieceIndex] = null;
                 // Have the peer broadcast "have" messages to all connected neighbors
                 broadcastHaveMsgs(pieceIndex);
@@ -271,10 +289,9 @@ public class PeerManager implements Runnable {
                     // Check if this peer is interested in one of the corresponding peer's pieces
                     // and send a request or not interested message based on the result
                     checkRequestsAndSendMsg();
-                }
-                else {
+                } else {
                     this.process.getPeerLogger().downloadCompleteLog();
-                    if(process.allFinished())
+                    if (process.allFinished())
                         this.process.stopChokes();
 
                     // Send a not interested message
@@ -282,8 +299,7 @@ public class PeerManager implements Runnable {
                         ActualMessage am = new ActualMessage(ActualMessage.MessageType.NOT_INTERESTED);
                         out.write(am.buildActualMessage());
                         out.flush();
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
@@ -294,39 +310,40 @@ public class PeerManager implements Runnable {
     }
 
     private void checkInterestAndSendMsg() {
-        BitSet correspondentPieces = this.process.getNeighborsPieces().get(this.correspondentPeerID);
-        BitSet myPieces = this.process.getNeighborsPieces().get(this.peerID);
+        try {
+            BitSet correspondentPieces = this.process.getNeighborsPieces().get(this.correspondentPeerID);
+            BitSet myPieces = this.process.getNeighborsPieces().get(this.peerID);
 
-        // See if we desire a piece from the corresponding peer
-        // If we do, set the boolean for desire to true
-        boolean desirePiece = false;
-        for (int i = 0; i < this.process.getPieceCount() && i < correspondentPieces.size(); i++) {
-            if (correspondentPieces.get(i) && !myPieces.get(i)) {
-                this.process.getRequestedInfo()[i] = this.correspondentPeerID;
-                desirePiece = true;
-                break;
-            }
-        }
+            System.out.println("Correspondent Pieces: " + correspondentPieces);
+            System.out.println("My Pieces: " + myPieces);
 
-        if (desirePiece) {
-            try {
-                ActualMessage am = new ActualMessage(ActualMessage.MessageType.INTERESTED);
-                out.write(am.buildActualMessage());
-                out.flush();
+            boolean desirePiece = false;
+            for (int i = 0; i < this.process.getPieceCount() && i < correspondentPieces.size(); i++) {
+                if (correspondentPieces.get(i) && !myPieces.get(i)) {
+                    this.process.getRequestedInfo()[i] = this.correspondentPeerID;
+                    desirePiece = true;
+                    break;
+                }
             }
-            catch (Exception e) {
-                e.printStackTrace();
+
+            ActualMessage am;
+            if (desirePiece) {
+                am = new ActualMessage(ActualMessage.MessageType.INTERESTED);
+                System.out.println("Sending INTERESTED message to peer: " + this.correspondentPeerID);
+            } else {
+                am = new ActualMessage(ActualMessage.MessageType.NOT_INTERESTED);
+                System.out.println("Sending NOT INTERESTED message to peer: " + this.correspondentPeerID);
             }
-        }
-        else {
-            try {
-                ActualMessage am = new ActualMessage(ActualMessage.MessageType.NOT_INTERESTED);
-                out.write(am.buildActualMessage());
-                out.flush();
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
+
+            out.write(am.buildActualMessage());
+            out.flush();
+        } catch (IOException e) {
+            System.err.println("IOException occurred while sending message to peer: " + this.correspondentPeerID);
+            e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println(
+                    "Unexpected exception occurred while sending message to peer: " + this.correspondentPeerID);
+            e.printStackTrace();
         }
     }
 
@@ -334,8 +351,10 @@ public class PeerManager implements Runnable {
         BitSet correspondentPieces = this.process.getNeighborsPieces().get(this.correspondentPeerID);
         BitSet myPieces = this.process.getNeighborsPieces().get(this.peerID);
 
-        // See if we desire a piece from the corresponding peer
-        // If we do, set the index of the requestedInfo array to the peer ID of the corresponding peer
+        System.out.println("Correspondent Pieces: " + correspondentPieces);
+        System.out.println("My Pieces: " + myPieces);
+        System.out.println("Requested Info: " + Arrays.toString(this.process.getRequestedInfo()));
+
         int desiredPiece = -1;
         for (int i = 0; i < this.process.getPieceCount() && i < correspondentPieces.size(); i++) {
             if (correspondentPieces.get(i) && !myPieces.get(i) && this.process.getRequestedInfo()[i] == null) {
@@ -345,35 +364,51 @@ public class PeerManager implements Runnable {
             }
         }
 
-        // If we have no desired piece, send a message that we're not interested
         if (desiredPiece < 0) {
             try {
                 ActualMessage am = new ActualMessage(ActualMessage.MessageType.NOT_INTERESTED);
                 out.write(am.buildActualMessage());
                 out.flush();
-            }
-            catch (Exception e) {
+                System.out.println("Sent NOT_INTERESTED message to peer: " + correspondentPeerID);
+            } catch (IOException e) {
+                System.err.println(
+                        "IOException occurred while sending NOT_INTERESTED message to peer: " + correspondentPeerID);
+                e.printStackTrace();
+            } catch (Exception e) {
+                System.err.println("Unexpected exception occurred while sending NOT_INTERESTED message to peer: "
+                        + correspondentPeerID);
                 e.printStackTrace();
             }
-        }
-        // Else, send a message that as a request for the desired piece
-        else {
+        } else {
             try {
                 byte[] requestPayload = ByteBuffer.allocate(4).putInt(desiredPiece).array();
                 ActualMessage am = new ActualMessage(ActualMessage.MessageType.REQUEST, requestPayload);
                 out.write(am.buildActualMessage());
                 out.flush();
-            }
-            catch (IOException e) {
-                throw new RuntimeException(e);
+                System.out
+                        .println("Sent REQUEST message for piece " + desiredPiece + " to peer: " + correspondentPeerID);
+            } catch (IOException e) {
+                System.err.println("IOException occurred while sending REQUEST message for piece " + desiredPiece
+                        + " to peer: " + correspondentPeerID);
+                e.printStackTrace();
+            } catch (Exception e) {
+                System.err.println("Unexpected exception occurred while sending REQUEST message for piece "
+                        + desiredPiece + " to peer: " + correspondentPeerID);
+                e.printStackTrace();
             }
         }
     }
 
-
-    private void broadcastHaveMsgs (int pieceIndex) {
+    private void broadcastHaveMsgs(int pieceIndex) {
         this.process.getConnectedNeighbors().forEach((key, value) -> {
-            value.sendHaveMsgs(pieceIndex);
+            try {
+                value.sendHaveMsgs(pieceIndex);
+                System.out.println("Broadcasted HAVE message for piece index: " + pieceIndex + " to peer: " + key);
+            } catch (Exception e) {
+                System.err
+                        .println("Error broadcasting HAVE message for piece index: " + pieceIndex + " to peer: " + key);
+                e.printStackTrace();
+            }
         });
     }
 
@@ -383,8 +418,13 @@ public class PeerManager implements Runnable {
             ActualMessage am = new ActualMessage(ActualMessage.MessageType.HAVE, requestPayload);
             out.write(am.buildActualMessage());
             out.flush();
-        }
-        catch (Exception e) {
+            System.out.println("Sent HAVE message for piece index: " + pieceIndex);
+        } catch (IOException e) {
+            System.err.println("IOException occurred while sending HAVE message for piece index: " + pieceIndex);
+            e.printStackTrace();
+        } catch (Exception e) {
+            System.err
+                    .println("Unexpected exception occurred while sending HAVE message for piece index: " + pieceIndex);
             e.printStackTrace();
         }
     }
@@ -395,19 +435,45 @@ public class PeerManager implements Runnable {
 
             this.out.write(am.buildActualMessage());
             this.out.flush();
-        }
-        catch (Exception e) {
+        } catch (IOException e) {
+            System.err.println("IOException occurred while sending a message of type " + type);
+            System.err.println("Error message: " + e.getMessage());
+            e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("Unexpected exception occurred while sending a message of type " + type);
+            System.err.println("Error message: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    public void setCorrespondentPeerID(String x) { this.correspondentPeerID = x;}
+    public void setCorrespondentPeerID(String x) {
+        try {
+            this.correspondentPeerID = x;
+            System.out.println("Correspondent peer ID set to: " + x);
+        } catch (Exception e) {
+            System.err.println("Error setting correspondent peer ID to: " + x);
+            e.printStackTrace();
+        }
+    }
+
     public void resetDownloadRate() {
-        this.downloadRate = 0;
+        try {
+            this.downloadRate = 0;
+            System.out.println("Download rate reset to 0.");
+        } catch (Exception e) {
+            System.err.println("Error resetting download rate.");
+            e.printStackTrace();
+        }
     }
 
     public int getDownloadRate() {
-        return this.downloadRate;
+        try {
+            System.out.println("Current download rate: " + this.downloadRate);
+            return this.downloadRate;
+        } catch (Exception e) {
+            System.err.println("Error retrieving download rate.");
+            e.printStackTrace();
+            return -1; // Return a default or error value
+        }
     }
-
 }
