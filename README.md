@@ -37,7 +37,7 @@ Run the code using `java PeerDriver ${peer_id)`, and replace the peer ID with th
 #### Contributions
 Justus Geslani - Justus implemented the PeerProcessLog, and he worked on the initial configs for the CommonConfig and PeerInfo.
 
-John Miclat - John did work upon several files. He implemented the PeerConfigManager, which manages the configs for both Common.cfg and PeerInfo.cfg. He also implemented the OptimisticUnchokeManager, the PeerDriver, CommonConfig, PeerInfoManager, PeerInfo (which is based off the given RemotePeerInfo), much of PeerProcess (initilziation, ctor, runServer, connectToNeighbors, and other minor contributions), and PeerTerminate. Aside from that, he aided in development of other classes.
+John Miclat - John did work upon several files. He implemented the PeerConfigManager, which manages the configs for both Common.cfg and PeerInfo.cfg. He also implemented the OptimisticUnchokeManager, the PeerDriver, CommonConfig, PeerInfoManager, PeerInfo (which is based off the given RemotePeerInfo), much of PeerProcess (initilziation, ctor, runServer, connectToNeighbors, and other minor contributions), and PeerTerminate. Aside from that, he aided in development of other classes. Sidenote, the submission deadline is on John's birthday, Happy Birthday John!
 
 Kevin Zhang - Kevin implemented the majority of the PeerManager, which handles the sending and receiving of messages between peers with the use of threads. Additionally, he worked predominantly within the UnchokeManager, as well as frequent changes within the PeerProcess. Much of the communication between the peers and the protocols were foundationally laid out by work with Kevin and the rest of the team.
 
